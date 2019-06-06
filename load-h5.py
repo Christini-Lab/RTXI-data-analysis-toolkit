@@ -3,7 +3,7 @@ import h5py
 import pdb
 # import numpy as np
 # from matplotlib import pyplot as plt
-pdb.set_trace()
+
 # 1. Import the h5 file
 filename = 'data/test_rtxitoolkit_050319.h5'
 
@@ -13,7 +13,7 @@ f = h5py.File(filename, 'r')
 # 3. The following function is used to get the keys of an h5 object
 def get_keys(f):
     return [key for key in f.keys()]
-
+pdb.set_trace()
 # 4. Get the keys for the h5 file
 print(get_keys(f))
 
