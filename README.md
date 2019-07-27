@@ -3,7 +3,7 @@ A collection of tools for processing RTXI output data
 
 Implementation notes:
 - Functions for processing data are written in **load_h5.py**
--
+- You can process data by following instructions in **process_rtxi.ipynb**.
 
 Current Features:
 - Load h5 file
