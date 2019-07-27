@@ -15,12 +15,12 @@ Current Features:
 
 #### Where to start:
 
-1. Install ![Jupyter Notebook](https://jupyter.org/install) on your computer
+1. Install [Jupyter Notebook](https://jupyter.org/install) on your computer
 2. From the terminal, clone this repo onto your computer:
 ```
 $ git clone https://github.com/Christini-Lab/RTXI-data-analysis-toolkit.git
 ```
-3. If you don't have an h5 file, get an example file from the ![Christini Box account](https://cornell.app.box.com/folder/78710760726). Copy the h5 file into the `./data/` folder in this directory.
+3. If you don't have an h5 file, get an example file from the [Christini Box account](https://cornell.app.box.com/folder/78710760726). Copy the h5 file into the `./data/` folder in this directory.
 
 4. From the terminal, start a jupyter notebook session:
 ```
