@@ -1,11 +1,11 @@
 # RTXI-data-analysis-toolkit
 A collection of tools for processing RTXI output data
 
-Implementation notes:
-- Functions for processing data are written in **load_h5.py**
-- You can process data by following instructions in **process_rtxi.ipynb**
+#### Implementation notes:
+- **load_h5.py** includes the functions for processing data
+- **process_rtxi.ipynb** includes step-by-step instructions for processing and visualizing the data
 
-Current Features:
+#### Current Features:
 - Load h5 file
 - Plot Voltage and Current vs time for the given trial
 - Print tags for the given trial
@@ -20,7 +20,7 @@ Current Features:
 ```
 $ git clone https://github.com/Christini-Lab/RTXI-data-analysis-toolkit.git
 ```
-3. If you don't have an h5 file, get an example file from the [Christini Box account](https://cornell.app.box.com/folder/78710760726). Copy the h5 file into the `./data/` folder in this directory.
+3. If you don't have an h5 file that you want to process, you can get an example file from the [Christini Box account](https://cornell.app.box.com/folder/78710760726). Copy the h5 file into the `./data/` folder in this directory.
 
 4. From the terminal, start a jupyter notebook session:
 ```
