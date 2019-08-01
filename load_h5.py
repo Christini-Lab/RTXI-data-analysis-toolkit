@@ -141,7 +141,7 @@ def save_SAP_to_csv(h5_file_path,sap_data,is_returned,label=''):
 def plot_all_aps(h5_file_path):
     data_path=h5_file_path[0:h5_file_path.find('.h5')-1]
     sap_files=get_files_in_directory(data_path)
-    fig,axes=plt.subplots(2,1)
+    fig,axes=plt.subplots(1,1)
     fig.tight_layout()
 
     for sap_file in sap_files:
@@ -170,7 +170,7 @@ def get_files_in_directory(directory):
 
 
 filename = 'data/attempt_2_071519.h5'
-plot_all_aps(filename)
+#plot_all_aps(filename)
 #trial_number=6
 #
 #data_h5=load_h5(filename)
