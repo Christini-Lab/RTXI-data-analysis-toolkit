@@ -167,6 +167,25 @@ def get_files_in_directory(directory):
                 files_in_directory.append(os.path.join(r,file))
     return files_in_directory
 
+
+def get_ap_amplitude(ap_data, is_plotted=False):
+    ap_amplitude = ap_data['Voltage (V)'].max() - ap_data['Voltage (V)'].min()
+
+    index = ap_data['Voltage (V)'].idxmax()
+    time_at_max = ap_data['Time (s)'].loc[index]
+    voltage_at_max = ap_data['Voltage (V)'].max()
+    voltage_at_min = ap_data['Voltage (V)'].min()
+    index2 = ap_data['Voltage (V)'].idxmin()
+    time_at_min = ap_data['Time (s)'].loc[index2]
+    if (is_plotted):
+        plt.plot(ap_data['Time (s)'], ap_data['Voltage (V)'])
+        plt.plot([time_at_min], [voltage_at_min], marker='o', markersize=10, color='red')
+        plt.plot([time_at_max], [voltage_at_max], marker='o', markersize=10, color='red')
+        plt.plot([time_at_max, time_at_max], [voltage_at_min, voltage_at_max], 'g-')
+        plt.xlabel('Time(s)')
+        plt.ylabel('Voltage(V)')
+    return ap_amplitude
+
 def get_ap_duration(ap_data, repolarization_percent, does_plot=False):
 
     voltage = ap_data['Voltage (V)']
@@ -197,6 +216,7 @@ def get_ap_duration(ap_data, repolarization_percent, does_plot=False):
 
 
     return ap_duration
+
 
 
 
