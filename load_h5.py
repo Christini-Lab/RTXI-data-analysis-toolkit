@@ -4,6 +4,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import pandas as pd
 import os
+from scipy import signal
 
 
 # 2. Read in the file
@@ -217,7 +218,22 @@ def get_ap_duration(ap_data, repolarization_percent, does_plot=False):
 
     return ap_duration
 
+def get_single_ap(ap_data, ap_number, does_plot=False):
+    voltage = ap_data['Voltage (V)']
+    voltage_local_max = np.ndarray.tolist(list(signal.find_peaks(voltage, distance=5000, prominence=.03, height=0))[0])
+    cycle_start = voltage_local_max[ap_number - 1]
+    cycle_end = voltage_local_max[ap_number]
+    single_ap_max = ap_data[cycle_start:cycle_end]
+    cycle_time = single_ap_max['Time (s)']
+    cycle_length = len(cycle_time)
+    ap_start = cycle_start - int(cycle_length / 4)
+    ap_end = ap_start + cycle_length
+    single_ap = ap_data[ap_start:ap_end]
 
+    if does_plot:
+        plt.plot(single_ap['Time (s)'], single_ap['Voltage (V)'])
+
+    return single_ap
 
 
 filename = 'data/attempt_2_071519.h5'
