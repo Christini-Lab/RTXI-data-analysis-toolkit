@@ -235,6 +235,27 @@ def get_single_ap(ap_data, ap_number, does_plot=False):
 
     return single_ap
 
+def get_ap_shape_factor_points(ap_data, repolarization_percent, does_plot=False):
+
+    voltage = ap_data['Voltage (V)']
+    time = ap_data['Time (s)']
+    voltage_max_loc = voltage.idxmax()
+    voltage_min = voltage.min()
+    voltage_min_loc = voltage.idxmin()
+    time_begin = time.idxmin()
+    ap_data_post_max = ap_data[(voltage_max_loc-time_begin):(voltage_min_loc-time_begin)]
+    amplitude = get_ap_amplitude(ap_data)
+    voltage_90 = voltage_min+(amplitude*(1-repolarization_percent))
+    voltage_90_loc = (ap_data_post_max['Voltage (V)']-voltage_90).abs().idxmin()
+    time_end = time.loc[voltage_90_loc]
+
+    if does_plot:
+        plt.plot(ap_data['Time (s)'],ap_data['Voltage (V)'])
+        plt.plot([time_end],[voltage_90],'yo')
+
+
+    return time_end, voltage_90
+
 
 filename = 'data/attempt_2_071519.h5'
 #plot_all_aps(filename)
