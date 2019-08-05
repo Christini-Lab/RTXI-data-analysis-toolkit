@@ -191,30 +191,22 @@ def get_ap_duration(ap_data, repolarization_percent, does_plot=False):
 
     voltage = ap_data['Voltage (V)']
     time = ap_data['Time (s)']
-    voltage_max = voltage.max()
-    voltage_max_loc = voltage.idxmax()
-    voltage_min = voltage.min()
-    voltage_min_loc = voltage.idxmin()
-    time_begin = time.idxmin()
-    ap_data_pre_max = ap_data[:(voltage_max_loc-time_begin)]
-    ap_data_post_max = ap_data[(voltage_max_loc-time_begin):(voltage_min_loc-time_begin)]
-    voltage_start = voltage[time_begin]
-    voltage_mid = ((voltage_max-voltage_start)/2)+voltage_start
+    ap_data_pre_max = ap_data[:(voltage.idxmax()-time.idxmin())]
+    ap_data_post_max = ap_data[(voltage.idxmax()-time.idxmin()):(voltage.idxmin()-time.idxmin())]
+    voltage_mid = ((voltage.max()-voltage[time.idxmin()])/2)+voltage[time.idxmin()]
     voltage_mid_loc = (ap_data_pre_max['Voltage (V)']-voltage_mid).abs().idxmin()
     amplitude = get_ap_amplitude(ap_data)
-    voltage_90 = voltage_min+(amplitude*(1-repolarization_percent))
+    voltage_90 = voltage.min()+(amplitude*(1-repolarization_percent))
     voltage_90_loc = (ap_data_post_max['Voltage (V)']-voltage_90).abs().idxmin()
     time_start = time.loc[voltage_mid_loc]
     time_end = time.loc[voltage_90_loc]
     ap_duration = time_end-time_start
 
     if does_plot:
-        print(ap_data)
         print('Action Potential Duration is',ap_duration)
         plt.plot(ap_data['Time (s)'],ap_data['Voltage (V)'])
         plt.plot([time_start,time_end],[voltage_mid,voltage_mid],'r-')
         plt.plot([time_start,time_end],[voltage_mid,voltage_90],'yo')
-
 
     return ap_duration
 
@@ -239,20 +231,15 @@ def get_ap_shape_factor_points(ap_data, repolarization_percent, does_plot=False)
 
     voltage = ap_data['Voltage (V)']
     time = ap_data['Time (s)']
-    voltage_max_loc = voltage.idxmax()
-    voltage_min = voltage.min()
-    voltage_min_loc = voltage.idxmin()
-    time_begin = time.idxmin()
-    ap_data_post_max = ap_data[(voltage_max_loc-time_begin):(voltage_min_loc-time_begin)]
+    ap_data_post_max = ap_data[(voltage.idxmax()-time.idxmin()):(voltage.idxmin()-time.idxmin())]
     amplitude = get_ap_amplitude(ap_data)
-    voltage_90 = voltage_min+(amplitude*(1-repolarization_percent))
+    voltage_90 = voltage.min()+(amplitude*(1-repolarization_percent))
     voltage_90_loc = (ap_data_post_max['Voltage (V)']-voltage_90).abs().idxmin()
     time_end = time.loc[voltage_90_loc]
 
     if does_plot:
         plt.plot(ap_data['Time (s)'],ap_data['Voltage (V)'])
         plt.plot([time_end],[voltage_90],'yo')
-
 
     return time_end, voltage_90
 
