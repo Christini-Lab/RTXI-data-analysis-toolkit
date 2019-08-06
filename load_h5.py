@@ -218,8 +218,12 @@ def get_single_ap(ap_data, ap_number, does_plot=False):
     single_ap_max = ap_data[cycle_start:cycle_end]
     cycle_time = single_ap_max['Time (s)']
     cycle_length = len(cycle_time)
-    ap_start = cycle_start - int(cycle_length / 4)
-    ap_end = ap_start + cycle_length
+    if cycle_length > 25000:
+        ap_start = cycle_start - 5000
+        ap_end = ap_start + 20000
+    else:
+        ap_start = cycle_start - int(cycle_length / 4)
+        ap_end = ap_start + cycle_length
     single_ap = ap_data[ap_start:ap_end]
 
     if does_plot:
