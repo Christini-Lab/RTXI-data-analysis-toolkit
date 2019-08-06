@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import os
 from scipy import signal
+import random
 
 
 # 2. Read in the file
@@ -218,8 +219,12 @@ def get_single_ap(ap_data, ap_number, does_plot=False):
     single_ap_max = ap_data[cycle_start:cycle_end]
     cycle_time = single_ap_max['Time (s)']
     cycle_length = len(cycle_time)
-    ap_start = cycle_start - int(cycle_length / 4)
-    ap_end = ap_start + cycle_length
+    if cycle_length > 25000:
+        ap_start = cycle_start - 5000
+        ap_end = ap_start + 20000
+    else:
+        ap_start = cycle_start - int(cycle_length / 4)
+        ap_end = ap_start + cycle_length
     single_ap = ap_data[ap_start:ap_end]
 
     if does_plot:
@@ -252,6 +257,49 @@ def get_ap_shape_factor(ap_data):
     APD_80 = get_ap_duration(ap_data, 0.8)
     ap_shape_factor = (APD_30-APD_40)/(APD_70-APD_80)
     return ap_shape_factor
+
+def get_cycle_lengths(ap_data):
+    voltage = ap_data['Voltage (V)']
+    voltage_local_max = np.ndarray.tolist(list(signal.find_peaks(voltage, distance=5000, prominence=.03, height=0))[0])
+    cycle_lengths = []
+    for x in range(len(voltage_local_max)-1):
+        cycle_start = voltage_local_max[x]
+        cycle_end = voltage_local_max[x+1]
+        single_ap_max = ap_data[cycle_start:cycle_end]
+        cycle_time = single_ap_max['Time (s)']
+        cycle_lengths.append(len(cycle_time))
+
+    return cycle_lengths
+
+def get_various_aps(ap_data, does_plot=False):
+    cycle_lengths = get_cycle_lengths(ap_data)
+    if len(cycle_lengths) < 5:
+        number_of_aps = len(number_of_aps)
+    else:
+        number_of_aps = 5
+    aps = []
+    locs = []
+    for x in range(number_of_aps):
+        if x == 0:
+            max_cycle_loc = cycle_lengths.index(max(cycle_lengths))+1
+            locs.append(max_cycle_loc)
+            aps.append(get_single_ap(ap_data, max_cycle_loc))
+        elif x == 1:
+            min_cycle_loc = cycle_lengths.index(min(cycle_lengths))+1
+            locs.append(min_cycle_loc)
+            aps.append(get_single_ap(ap_data, min_cycle_loc))
+        else:
+            random_cycle_loc = random.randint(0,(len(cycle_lengths)-1))
+            locs.append(random_cycle_loc)
+            aps.append(get_single_ap(ap_data, random_cycle_loc))
+
+    if does_plot:
+        for x in range(number_of_aps):
+            aps_copy = zero_ap_data(aps[x].reset_index())
+            plt.plot(aps_copy['Time (s)'], aps_copy['Voltage (V)'])
+        print(locs)
+
+    return aps
 
 
 def get_ap_vmax(ap_data, percent_up):
