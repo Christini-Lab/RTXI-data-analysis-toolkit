@@ -254,6 +254,74 @@ def get_ap_shape_factor(ap_data):
     return ap_shape_factor
 
 
+def get_ap_vmax(ap_data, percent_up):
+    time = ap_data['Time (s)']
+    voltage = ap_data['Voltage (V)']
+    time_begin = ap_data['Time (s)'].idxmin()
+    ap_data_pre_max = ap_data[:(voltage.idxmax() - time_begin)]
+    ap_data_post_max = ap_data[(voltage.idxmax() - time_begin):(voltage.idxmin() - time_begin)]
+    voltage_start = voltage[time_begin]
+    voltage_mid = ((voltage.max() - voltage_start) * percent_up) + voltage_start
+    voltage_mid_loc = (ap_data_pre_max['Voltage (V)'] - voltage_mid).abs().idxmin()
+
+    return voltage_mid_loc
+
+
+def plot_ap_vmax(ap_data, is_plotted=False):
+    time = ap_data['Time (s)']
+    voltage = ap_data['Voltage (V)']
+
+    time_start_50 = time.loc[get_ap_vmax(ap_data, 0.5)]
+    voltage_mid_50 = voltage.loc[get_ap_vmax(ap_data, 0.5)]
+    time_start_85 = time.loc[get_ap_vmax(ap_data, 0.85)]
+    voltage_mid_85 = voltage.loc[get_ap_vmax(ap_data, 0.85)]
+    time_start_25 = time.loc[get_ap_vmax(ap_data, 0.25)]
+    voltage_mid_25 = voltage.loc[get_ap_vmax(ap_data, 0.25)]
+
+    if is_plotted:
+        plt.plot(ap_data['Time (s)'], ap_data['Voltage (V)'])
+        plt.plot([time_start_50], [voltage_mid_50], 'yo')
+        plt.plot([time_start_85], [voltage_mid_85], 'yo')
+        plt.plot([time_start_25], [voltage_mid_25], 'yo')
+
+
+def draw_line(ap_data, is_plotted=False):
+    time = ap_data['Time (s)']
+    voltage = ap_data['Voltage (V)']
+    time_start_50 = time.loc[get_ap_vmax(ap_data, 0.5)]
+    voltage_mid_50 = voltage.loc[get_ap_vmax(ap_data, 0.5)]
+    time_start_85 = time.loc[get_ap_vmax(ap_data, 0.85)]
+    voltage_mid_85 = voltage.loc[get_ap_vmax(ap_data, 0.85)]
+    time_start_25 = time.loc[get_ap_vmax(ap_data, 0.25)]
+    voltage_mid_25 = voltage.loc[get_ap_vmax(ap_data, 0.25)]
+
+    x_number_values = [time_start_50, time_start_85, time_start_25]
+    y_number_values = [voltage_mid_50, voltage_mid_85, voltage_mid_25]
+
+    if is_plotted:
+        plt.plot(x_number_values, y_number_values, linewidth=2)
+        plt.xlabel('Time(s)')
+        plt.ylabel('Voltage(V)')
+        plt.show
+
+
+def get_slope(ap_data):
+    time = ap_data['Time (s)']
+    voltage = ap_data['Voltage (V)']
+    time_start_50 = time.loc[get_ap_vmax(ap_data, 0.5)]
+    voltage_mid_50 = voltage.loc[get_ap_vmax(ap_data, 0.5)]
+    time_start_85 = time.loc[get_ap_vmax(ap_data, 0.85)]
+    voltage_mid_85 = voltage.loc[get_ap_vmax(ap_data, 0.85)]
+    time_start_25 = time.loc[get_ap_vmax(ap_data, 0.25)]
+    voltage_mid_25 = voltage.loc[get_ap_vmax(ap_data, 0.25)]
+
+    m = (voltage_mid_85 - voltage_mid_25) / (time_start_85 - time_start_25)
+    return m
+
+
+
+
+
 filename = 'data/attempt_2_071519.h5'
 #plot_all_aps(filename)
 #trial_number=6
