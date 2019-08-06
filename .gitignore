@@ -2,3 +2,4 @@ __pycache__/
 data/test_rtxitoolkit_050319.h5
 data
 .ipynb_checkpoints/
+.DS_Store
