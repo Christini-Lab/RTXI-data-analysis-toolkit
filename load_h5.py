@@ -195,19 +195,19 @@ def get_ap_duration(sap_data, repolarization_percent, does_plot=False):
     time = ap_data_copy['Time (s)']
     ap_data_pre_max = ap_data_copy[:(voltage.idxmax()-time.idxmin())]
     ap_data_post_max = ap_data_copy[(voltage.idxmax()-time.idxmin()):]
-    print(ap_data_post_max)
+    ap_data_max_to_min = ap_data_post_max[:ap_data_post_max['Voltage (V)'].idxmin()]
     voltage_mid = ((voltage.max()-voltage[time.idxmin()])/2)+voltage[time.idxmin()]
     voltage_mid_loc = (ap_data_pre_max['Voltage (V)']-voltage_mid).abs().idxmin()
     amplitude = get_ap_amplitude(ap_data_copy)
     voltage_90 = voltage.min()+(amplitude*(1-repolarization_percent))
-    voltage_90_loc = (ap_data_post_max['Voltage (V)']-voltage_90).abs().idxmin()
+    voltage_90_loc = (ap_data_max_to_min['Voltage (V)']-voltage_90).abs().idxmin()
     time_start = time.loc[voltage_mid_loc]
     time_end = time.loc[voltage_90_loc]
     ap_duration = time_end-time_start
 
     if does_plot:
         print('Action Potential Duration is',ap_duration)
-        plt.plot(ap_data_copy['Time (s)'],ap_data_copy['Voltage (V)'])
+        plot_single_ap(ap_data_copy)
         plt.plot([time_start,time_end],[voltage_mid,voltage_mid],'r-')
         plt.plot([time_start,time_end],[voltage_mid,voltage_90],'yo')
 
@@ -230,7 +230,7 @@ def get_single_ap(ap_data, ap_number, does_plot=False):
     single_ap = ap_data[ap_start:ap_end]
 
     if does_plot:
-        plt.plot(single_ap['Time (s)'], single_ap['Voltage (V)'])
+        plot_single_ap(single_ap)
 
     return single_ap
 
@@ -245,7 +245,7 @@ def get_ap_shape_factor_points(ap_data, repolarization_percent, does_plot=False)
     time_end = time.loc[voltage_90_loc]
 
     if does_plot:
-        plt.plot(ap_data['Time (s)'],ap_data['Voltage (V)'])
+        plot_single_ap(ap_data)
         plt.plot([time_end],[voltage_90],'yo')
 
     return time_end, voltage_90
@@ -273,6 +273,9 @@ def get_cycle_lengths(ap_data):
 
     return cycle_lengths
 
+def plot_single_ap(sap_data):
+    plt.plot(sap_data['Time (s)'], sap_data['Voltage (V)'])
+
 def get_various_aps(ap_data, does_plot=False):
     cycle_lengths = get_cycle_lengths(ap_data)
     if len(cycle_lengths) < 5:
@@ -298,7 +301,7 @@ def get_various_aps(ap_data, does_plot=False):
     if does_plot:
         for x in range(number_of_aps):
             aps_copy = zero_ap_data(aps[x].reset_index())
-            plt.plot(aps_copy['Time (s)'], aps_copy['Voltage (V)'])
+            plot_single_ap(aps_copy)
 
     return aps
 
@@ -366,8 +369,6 @@ def get_slope(ap_data):
 
     m = (voltage_mid_85 - voltage_mid_25) / (time_start_85 - time_start_25)
     return m
-
-
 
 
 
