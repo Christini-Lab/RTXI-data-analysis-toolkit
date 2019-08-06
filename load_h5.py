@@ -188,15 +188,17 @@ def get_ap_amplitude(ap_data, is_plotted=False):
         plt.ylabel('Voltage(V)')
     return ap_amplitude
 
-def get_ap_duration(ap_data, repolarization_percent, does_plot=False):
+def get_ap_duration(sap_data, repolarization_percent, does_plot=False):
 
-    voltage = ap_data['Voltage (V)']
-    time = ap_data['Time (s)']
-    ap_data_pre_max = ap_data[:(voltage.idxmax()-time.idxmin())]
-    ap_data_post_max = ap_data[(voltage.idxmax()-time.idxmin()):(voltage.idxmin()-time.idxmin())]
+    ap_data_copy = sap_data.reset_index()
+    voltage = ap_data_copy['Voltage (V)']
+    time = ap_data_copy['Time (s)']
+    ap_data_pre_max = ap_data_copy[:(voltage.idxmax()-time.idxmin())]
+    ap_data_post_max = ap_data_copy[(voltage.idxmax()-time.idxmin()):]
+    print(ap_data_post_max)
     voltage_mid = ((voltage.max()-voltage[time.idxmin()])/2)+voltage[time.idxmin()]
     voltage_mid_loc = (ap_data_pre_max['Voltage (V)']-voltage_mid).abs().idxmin()
-    amplitude = get_ap_amplitude(ap_data)
+    amplitude = get_ap_amplitude(ap_data_copy)
     voltage_90 = voltage.min()+(amplitude*(1-repolarization_percent))
     voltage_90_loc = (ap_data_post_max['Voltage (V)']-voltage_90).abs().idxmin()
     time_start = time.loc[voltage_mid_loc]
@@ -205,7 +207,7 @@ def get_ap_duration(ap_data, repolarization_percent, does_plot=False):
 
     if does_plot:
         print('Action Potential Duration is',ap_duration)
-        plt.plot(ap_data['Time (s)'],ap_data['Voltage (V)'])
+        plt.plot(ap_data_copy['Time (s)'],ap_data_copy['Voltage (V)'])
         plt.plot([time_start,time_end],[voltage_mid,voltage_mid],'r-')
         plt.plot([time_start,time_end],[voltage_mid,voltage_90],'yo')
 
@@ -274,7 +276,7 @@ def get_cycle_lengths(ap_data):
 def get_various_aps(ap_data, does_plot=False):
     cycle_lengths = get_cycle_lengths(ap_data)
     if len(cycle_lengths) < 5:
-        number_of_aps = len(number_of_aps)
+        number_of_aps = len(cycle_lengths)
     else:
         number_of_aps = 5
     aps = []
@@ -297,7 +299,6 @@ def get_various_aps(ap_data, does_plot=False):
         for x in range(number_of_aps):
             aps_copy = zero_ap_data(aps[x].reset_index())
             plt.plot(aps_copy['Time (s)'], aps_copy['Voltage (V)'])
-        print(locs)
 
     return aps
 
