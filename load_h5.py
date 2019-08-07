@@ -229,7 +229,9 @@ def get_ap_duration(sap_data, repolarization_percent, does_plot=False):
 def get_single_ap(ap_data, ap_number, does_plot=False):
     voltage = ap_data['Voltage (V)']
     time = ap_data['Time (s)']
-    voltage_local_max = np.ndarray.tolist(list(signal.find_peaks(voltage, distance=5000, prominence=.03, height=0))[0])
+    voltage_local_max = find_voltage_peaks(voltage)
+    if ap_number == 0:
+        ap_number = random.randint(1,(len(voltage_local_max)-1))
     cycle_start = voltage_local_max[ap_number - 1]
     cycle_end = voltage_local_max[ap_number]
     single_ap_max = ap_data[cycle_start:cycle_end]
@@ -279,7 +281,7 @@ def get_ap_shape_factor(ap_data):
 
 def get_cycle_lengths(ap_data):
     voltage = ap_data['Voltage (V)']
-    voltage_local_max = np.ndarray.tolist(list(signal.find_peaks(voltage, distance=5000, prominence=.03, height=0))[0])
+    voltage_local_max = find_voltage_peaks(voltage)
     cycle_lengths = []
     for x in range(len(voltage_local_max) - 1):
         cycle_start = voltage_local_max[x]
@@ -297,6 +299,10 @@ def get_cycle_lengths(ap_data):
 def plot_single_ap(sap_data):
     plt.plot(sap_data['Time (s)'], sap_data['Voltage (V)'])
 
+def find_voltage_peaks(voltage):
+    voltage_peaks = np.ndarray.tolist(list(signal.find_peaks(voltage, distance=5000, prominence=.03, height=0))[0])
+
+    return voltage_peaks
 
 def get_various_aps(ap_data, does_plot=False):
     cycle_lengths = get_cycle_lengths(ap_data)
