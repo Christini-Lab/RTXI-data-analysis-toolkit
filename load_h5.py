@@ -266,6 +266,8 @@ def get_ap_shape_factor_points(ap_data, repolarization_percent, does_plot=False)
     if does_plot:
         plot_single_ap(ap_data)
         plt.plot([time_end], [voltage_90], 'yo')
+        plt.xlabel('Time(s)')
+        plt.ylabel('Voltage(V)')
 
     return time_end, voltage_90
 
