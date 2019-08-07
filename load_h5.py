@@ -399,7 +399,7 @@ def get_slope(ap_data):
 def get_all_apds(ap_data, depolarization_percent, repolarization_percent, does_plot = False):
     cycle_lengths = get_cycle_lengths(ap_data)
     apds = []
-    for x in range(len(1,cycle_lengths)+1):
+    for x in range(1,len(cycle_lengths)+1):
         single_ap = get_single_ap(ap_data, x)
         apds.append(get_ap_duration(single_ap, depolarization_percent, repolarization_percent))
 
@@ -419,6 +419,17 @@ def get_all_apas(ap_data, does_plot = False):
         plt.plot(apas)
 
     return apas
+
+def get_ap_range(ap_data, first_ap, last_ap, does_plot = False):
+    ap_range = []
+    for x in range(last_ap - first_ap):
+        ap_range.append(get_single_ap(ap_data, (first_ap + x)))
+
+    if does_plot:
+        for x in range(last_ap - first_ap):
+            plot_single_ap(ap_range[x])
+
+    return ap_range
 
 filename = 'data/attempt_2_071519.h5'
 # plot_all_aps(filename)
