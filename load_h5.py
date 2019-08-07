@@ -388,7 +388,7 @@ def get_slope(ap_data):
     time_start_25 = time.loc[get_ap_vmax(ap_data, 0.25)]
     voltage_mid_25 = voltage.loc[get_ap_vmax(ap_data, 0.25)]
 
-    m = (voltage_mid_85 - voltage_mid_25) / (time_start_85 - time_start_25)
+    m = (voltage_mid_85 - voltage_mid_50) / (time_start_85 - time_start_50)
     return m
 
 
