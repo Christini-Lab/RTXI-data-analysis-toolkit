@@ -193,8 +193,8 @@ def get_ap_amplitude(ap_data, is_plotted=False):
     time_at_min = ap_data['Time (s)'].loc[index2]
     if (is_plotted):
         plt.plot(ap_data['Time (s)'], ap_data['Voltage (V)'])
-        plt.plot([time_at_min], [voltage_at_min], marker='o', markersize=10, color='red')
-        plt.plot([time_at_max], [voltage_at_max], marker='o', markersize=10, color='red')
+        plt.plot([time_at_min], [voltage_at_min], marker='o', markersize=5, color='red')
+        plt.plot([time_at_max], [voltage_at_max], marker='o', markersize=5, color='red')
         plt.plot([time_at_max, time_at_max], [voltage_at_min, voltage_at_max], 'g-')
         plt.xlabel('Time(s)')
         plt.ylabel('Voltage(V)')
@@ -344,8 +344,8 @@ def plot_ap_vmax(ap_data, is_plotted=False):
     time = ap_data['Time (s)']
     voltage = ap_data['Voltage (V)']
 
-    time_start_50 = time.loc[get_ap_vmax(ap_data, 0.5)]
-    voltage_mid_50 = voltage.loc[get_ap_vmax(ap_data, 0.5)]
+    time_start_50 = time.loc[get_ap_vmax(ap_data, 0.45)]
+    voltage_mid_50 = voltage.loc[get_ap_vmax(ap_data, 0.45)]
     time_start_85 = time.loc[get_ap_vmax(ap_data, 0.85)]
     voltage_mid_85 = voltage.loc[get_ap_vmax(ap_data, 0.85)]
     time_start_25 = time.loc[get_ap_vmax(ap_data, 0.25)]
@@ -361,8 +361,8 @@ def plot_ap_vmax(ap_data, is_plotted=False):
 def draw_line(ap_data, is_plotted=False):
     time = ap_data['Time (s)']
     voltage = ap_data['Voltage (V)']
-    time_start_50 = time.loc[get_ap_vmax(ap_data, 0.5)]
-    voltage_mid_50 = voltage.loc[get_ap_vmax(ap_data, 0.5)]
+    time_start_50 = time.loc[get_ap_vmax(ap_data, 0.45)]
+    voltage_mid_50 = voltage.loc[get_ap_vmax(ap_data, 0.45)]
     time_start_85 = time.loc[get_ap_vmax(ap_data, 0.85)]
     voltage_mid_85 = voltage.loc[get_ap_vmax(ap_data, 0.85)]
     time_start_25 = time.loc[get_ap_vmax(ap_data, 0.25)]
@@ -381,8 +381,8 @@ def draw_line(ap_data, is_plotted=False):
 def get_slope(ap_data):
     time = ap_data['Time (s)']
     voltage = ap_data['Voltage (V)']
-    time_start_50 = time.loc[get_ap_vmax(ap_data, 0.5)]
-    voltage_mid_50 = voltage.loc[get_ap_vmax(ap_data, 0.5)]
+    time_start_50 = time.loc[get_ap_vmax(ap_data, 0.45)]
+    voltage_mid_50 = voltage.loc[get_ap_vmax(ap_data, 0.45)]
     time_start_85 = time.loc[get_ap_vmax(ap_data, 0.85)]
     voltage_mid_85 = voltage.loc[get_ap_vmax(ap_data, 0.85)]
     time_start_25 = time.loc[get_ap_vmax(ap_data, 0.25)]
