@@ -201,7 +201,7 @@ def get_ap_amplitude(ap_data, is_plotted=False):
     return ap_amplitude
 
 
-def get_ap_duration(sap_data, depolarization_percent = 0.9, repolarization_percent = 0.5, does_plot=False):
+def get_ap_duration(sap_data, depolarization_percent = 0.5, repolarization_percent = 0.9, does_plot=False):
     ap_data_copy = sap_data.reset_index()
     voltage = ap_data_copy['Voltage (V)']
     time = ap_data_copy['Time (s)']
