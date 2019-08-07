@@ -201,7 +201,7 @@ def get_ap_amplitude(ap_data, is_plotted=False):
     return ap_amplitude
 
 
-def get_ap_duration(sap_data, depolarization_percent, repolarization_percent, does_plot=False):
+def get_ap_duration(sap_data, depolarization_percent = 0.9, repolarization_percent = 0.5, does_plot=False):
     ap_data_copy = sap_data.reset_index()
     voltage = ap_data_copy['Voltage (V)']
     time = ap_data_copy['Time (s)']
@@ -407,6 +407,18 @@ def get_all_apds(ap_data, depolarization_percent, repolarization_percent, does_p
         plt.plot(apds)
 
     return apds
+
+def get_all_apas(ap_data, does_plot = False):
+    cycle_lengths = get_cycle_lengths(ap_data)
+    apas = []
+    for x in range(len(cycle_lengths)+1):
+        single_ap = get_single_ap(ap_data, x)
+        apas.append(get_ap_amplitude(single_ap))
+
+    if does_plot:
+        plt.plot(apas)
+
+    return apas
 
 filename = 'data/attempt_2_071519.h5'
 # plot_all_aps(filename)
