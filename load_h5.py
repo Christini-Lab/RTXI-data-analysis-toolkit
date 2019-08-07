@@ -273,10 +273,10 @@ def get_ap_shape_factor_points(ap_data, repolarization_percent, does_plot=False)
 
 
 def get_ap_shape_factor(ap_data):
-    APD_30 = get_ap_duration(ap_data, 0.3)
-    APD_40 = get_ap_duration(ap_data, 0.4)
-    APD_70 = get_ap_duration(ap_data, 0.7)
-    APD_80 = get_ap_duration(ap_data, 0.8)
+    APD_30 = get_ap_duration(ap_data, 0.5, 0.3)
+    APD_40 = get_ap_duration(ap_data, 0.5, 0.4)
+    APD_70 = get_ap_duration(ap_data, 0.5, 0.7)
+    APD_80 = get_ap_duration(ap_data, 0.5, 0.8)
     ap_shape_factor = (APD_30 - APD_40) / (APD_70 - APD_80)
     return ap_shape_factor
 
