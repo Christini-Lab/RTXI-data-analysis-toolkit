@@ -201,14 +201,14 @@ def get_ap_amplitude(ap_data, is_plotted=False):
     return ap_amplitude
 
 
-def get_ap_duration(sap_data, repolarization_percent, does_plot=False):
+def get_ap_duration(sap_data, depolarization_percent, repolarization_percent, does_plot=False):
     ap_data_copy = sap_data.reset_index()
     voltage = ap_data_copy['Voltage (V)']
     time = ap_data_copy['Time (s)']
     ap_data_pre_max = ap_data_copy[:(voltage.idxmax() - time.idxmin())]
     ap_data_post_max = ap_data_copy[(voltage.idxmax() - time.idxmin()):]
     ap_data_max_to_min = ap_data_post_max[:ap_data_post_max['Voltage (V)'].idxmin()]
-    voltage_mid = ((voltage.max() - voltage[time.idxmin()]) / 2) + voltage[time.idxmin()]
+    voltage_mid = ((voltage.max() - voltage[time.idxmin()]) * depolarization_percent) + voltage[time.idxmin()]
     voltage_mid_loc = (ap_data_pre_max['Voltage (V)'] - voltage_mid).abs().idxmin()
     amplitude = get_ap_amplitude(ap_data_copy)
     voltage_90 = voltage.min() + (amplitude * (1 - repolarization_percent))
@@ -394,6 +394,17 @@ def get_slope(ap_data):
     m = (voltage_mid_85 - voltage_mid_50) / (time_start_85 - time_start_50)
     return m
 
+def get_all_apds(ap_data, depolarization_percent, repolarization_percent, does_plot = False):
+    cycle_lengths = get_cycle_lengths(ap_data)
+    apds = []
+    for x in range(len(cycle_lengths)+1):
+        single_ap = get_single_ap(ap_data, x)
+        apds.append(get_ap_duration(single_ap, depolarization_percent, repolarization_percent))
+
+    if does_plot:
+        plt.plot(apds)
+
+    return apds
 
 filename = 'data/attempt_2_071519.h5'
 # plot_all_aps(filename)
