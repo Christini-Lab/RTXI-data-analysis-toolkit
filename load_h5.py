@@ -279,7 +279,7 @@ def get_ap_shape_factor(ap_data):
     return ap_shape_factor
 
 
-def get_cycle_lengths(ap_data):
+def get_cycle_lengths(ap_data, does_plot = False):
     voltage = ap_data['Voltage (V)']
     voltage_local_max = find_voltage_peaks(voltage)
     cycle_lengths = []
@@ -292,6 +292,9 @@ def get_cycle_lengths(ap_data):
             cycle_lengths.append(cycle_lengths[-1])
         else:
             cycle_lengths.append(len(cycle_time))
+
+    if does_plot:
+        plt.plot(cycle_lengths)
 
     return cycle_lengths
 
