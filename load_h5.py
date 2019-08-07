@@ -421,12 +421,13 @@ def get_all_apas(ap_data, does_plot = False):
     return apas
 
 def get_ap_range(ap_data, first_ap, last_ap, does_plot = False):
+    last_ap_copy = last_ap + 1
     ap_range = []
-    for x in range(last_ap - first_ap):
+    for x in range(last_ap_copy - first_ap):
         ap_range.append(get_single_ap(ap_data, (first_ap + x)))
 
     if does_plot:
-        for x in range(last_ap - first_ap):
+        for x in range(last_ap_copy - first_ap):
             plot_single_ap(ap_range[x])
 
     return ap_range
