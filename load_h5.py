@@ -2,6 +2,7 @@ import h5py
 import pdb
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib import patches as mpatches
 import pandas as pd
 import os
 from scipy import signal
@@ -457,6 +458,19 @@ def smooth_ap_data(ap_data, degree, does_plot=False):
         plot_single_ap(smoothed_ap_data)
 
     return smoothed_ap_data
+
+def compare_aps(first_ap,second_ap):
+    first_ap_copy = zero_ap_data(first_ap.reset_index())
+    second_ap_copy = zero_ap_data(second_ap.reset_index())
+    plot_single_ap(first_ap_copy)
+    plot_single_ap(second_ap_copy)
+    blue_patch = mpatches.Patch(color='C0', label='First AP')
+    orange_patch = mpatches.Patch(color='C1', label='Second AP')
+    plt.legend(handles=[blue_patch,orange_patch])
+    print('AP Durations:')
+    print('First AP:',get_ap_duration(first_ap_copy,.5,.9),' Second AP:',get_ap_duration(second_ap_copy,.5,.9))
+    print('AP Amplitudes:')
+    print('First AP:',get_ap_amplitude(first_ap_copy),' Second AP:',get_ap_amplitude(second_ap_copy))
 
 filename = 'data/attempt_2_071519.h5'
 # plot_all_aps(filename)
