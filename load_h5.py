@@ -432,6 +432,32 @@ def get_ap_range(ap_data, first_ap, last_ap, does_plot = False):
 
     return ap_range
 
+
+def smooth_ap_data(ap_data, degree, does_plot=False):
+    smoothed_ap_data = ap_data.copy()
+    voltage = list(smoothed_ap_data['Voltage (V)'])
+    window = (degree * 2) - 1
+    weight = np.array([1] * window)
+    weight_gauss = []
+    for x in range(window):
+        x = x - degree + 1
+        fraction = x / float(window)
+        gauss = 1 / (np.exp((4 * (fraction)) ** 2))
+        weight_gauss.append(gauss)
+    weight = np.array(weight_gauss) * weight
+    smoothed = [0.0] * (len(voltage) - window)
+    for x in range(len(smoothed)):
+        smoothed[x] = sum(np.array(voltage[x : x + window]) * weight) / sum(weight)
+    smoothed_length = len(smoothed)
+    for x in range(window):
+        smoothed.append(voltage[smoothed_length + x])
+    smoothed_ap_data['Voltage (V)'] = smoothed
+
+    if does_plot:
+        plot_single_ap(smoothed_ap_data)
+
+    return smoothed_ap_data
+
 filename = 'data/attempt_2_071519.h5'
 # plot_all_aps(filename)
 # trial_number=6
