@@ -218,7 +218,7 @@ def get_ap_duration(sap_data, depolarization_percent, repolarization_percent, do
     ap_duration = time_end - time_start
 
     if does_plot:
-        print('Action Potential Duration is', ap_duration)
+        print('Action Potential Duration is ', ap_duration, ' seconds')
         plot_single_ap(ap_data_copy)
         plt.plot([time_start, time_end], [voltage_mid, voltage_mid], 'r-')
         plt.plot([time_start, time_end], [voltage_mid, voltage_90], 'yo')
@@ -296,13 +296,20 @@ def get_cycle_lengths(ap_data, does_plot = False):
             cycle_lengths.append(len(cycle_time))
 
     if does_plot:
-        plt.plot(cycle_lengths)
+        cycle_lengths_copy = []
+        for x in range(len(cycle_lengths)):
+            cycle_lengths_copy.append(cycle_lengths[x] / 10000)
+        plt.plot(cycle_lengths_copy)
+        plt.xlabel('Action Potentials')
+        plt.ylabel('Cycle Lengths (s)')
 
     return cycle_lengths
 
 
 def plot_single_ap(sap_data):
     plt.plot(sap_data['Time (s)'], sap_data['Voltage (V)'])
+    plt.xlabel('Time (s)')
+    plt.ylabel('Voltage (V)')
 
 def find_voltage_peaks(voltage):
     voltage_peaks = np.ndarray.tolist(list(signal.find_peaks(voltage, distance=5000, prominence=.03, height=0))[0])
@@ -320,6 +327,8 @@ def get_various_aps(ap_data, does_plot=False):
     bloc_size = len(cycle_lengths) / number_of_aps
     for x in range(number_of_aps):
         random_cycle_loc = int(random.uniform((bloc_size * x), (bloc_size * (x + 1))))
+        if random_cycle_loc == 0:
+            random_cycle_loc = 1
         locs.append(random_cycle_loc)
         aps.append(get_single_ap(ap_data, random_cycle_loc))
 
@@ -405,6 +414,8 @@ def get_all_apds(ap_data, depolarization_percent, repolarization_percent, does_p
 
     if does_plot:
         plt.plot(apds)
+        plt.xlabel('Action Potentials')
+        plt.ylabel('Durations (s)')
 
     return apds
 
@@ -417,6 +428,8 @@ def get_all_apas(ap_data, does_plot = False):
 
     if does_plot:
         plt.plot(apas)
+        plt.xlabel('Action Potentials')
+        plt.ylabel('Amplitudes (V)')
 
     return apas
 
