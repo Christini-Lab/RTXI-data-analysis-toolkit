@@ -210,11 +210,9 @@ def get_ap_duration(sap_data, depolarization_percent, repolarization_percent, do
     ap_data_max_to_min = ap_data_post_max[:ap_data_post_max['Voltage (V)'].idxmin()]
     voltage_mid = ((voltage.max() - voltage[time.idxmin()]) * depolarization_percent) + voltage[time.idxmin()]
     voltage_mid_loc = (ap_data_pre_max['Voltage (V)'] - voltage_mid).abs().idxmin()
-    amplitude = get_ap_amplitude(ap_data_copy)
-    voltage_90 = voltage.min() + (amplitude * (1 - repolarization_percent))
-    voltage_90_loc = (ap_data_max_to_min['Voltage (V)'] - voltage_90).abs().idxmin()
+    voltage_90 = voltage.min() + (get_ap_amplitude(ap_data_copy) * (1 - repolarization_percent))
     time_start = time.loc[voltage_mid_loc]
-    time_end = time.loc[voltage_90_loc]
+    time_end = time.loc[(ap_data_max_to_min['Voltage (V)'] - voltage_90).abs().idxmin()]
     ap_duration = time_end - time_start
 
     if does_plot:
@@ -227,25 +225,20 @@ def get_ap_duration(sap_data, depolarization_percent, repolarization_percent, do
 
 
 def get_single_ap(ap_data, ap_number, does_plot=False):
-    voltage = ap_data['Voltage (V)']
-    time = ap_data['Time (s)']
-    voltage_local_max = find_voltage_peaks(voltage)
+    voltage_local_max = find_voltage_peaks(ap_data['Voltage (V)'])
     if ap_number == 0:
         ap_number = random.randint(1,(len(voltage_local_max)-1))
     cycle_start = voltage_local_max[ap_number - 1]
-    cycle_end = voltage_local_max[ap_number]
-    single_ap_max = ap_data[cycle_start:cycle_end]
-    cycle_time = single_ap_max['Time (s)']
-    cycle_length = len(cycle_time)
-    if cycle_length > 25000:
+    single_ap_max = ap_data[cycle_start:voltage_local_max[ap_number]]
+    if len(single_ap_max['Time (s)']) > 25000:
         ap_start = cycle_start - 5000
     else:
-        ap_start = cycle_start - int(cycle_length / 4)
-    ap_data_post_max = ap_data[(voltage.idxmax() - time.idxmin()):]
+        ap_start = cycle_start - int(len(single_ap_max['Time (s)']) / 4)
+    ap_data_post_max = ap_data[(ap_data['Voltage (V)'].idxmax() - ap_data['Time (s)'].idxmin()):]
     if (ap_data_post_max['Voltage (V)'].idxmin() - cycle_start) > 6000:
         ap_end = cycle_start + 7500
     else:
-        ap_end = ap_start + cycle_length
+        ap_end = ap_start + len(single_ap_max['Time (s)'])
     single_ap = ap_data[ap_start:ap_end]
 
     if does_plot:
@@ -258,10 +251,8 @@ def get_ap_shape_factor_points(ap_data, repolarization_percent, does_plot=False)
     voltage = ap_data['Voltage (V)']
     time = ap_data['Time (s)']
     ap_data_post_max = ap_data[(voltage.idxmax() - time.idxmin()):(voltage.idxmin() - time.idxmin())]
-    amplitude = get_ap_amplitude(ap_data)
-    voltage_90 = voltage.min() + (amplitude * (1 - repolarization_percent))
-    voltage_90_loc = (ap_data_post_max['Voltage (V)'] - voltage_90).abs().idxmin()
-    time_end = time.loc[voltage_90_loc]
+    voltage_90 = voltage.min() + (get_ap_amplitude(ap_data) * (1 - repolarization_percent))
+    time_end = time.loc[(ap_data_post_max['Voltage (V)'] - voltage_90).abs().idxmin()]
 
     if does_plot:
         plot_single_ap(ap_data)
@@ -282,14 +273,10 @@ def get_ap_shape_factor(ap_data):
 
 
 def get_cycle_lengths(ap_data, does_plot = False):
-    voltage = ap_data['Voltage (V)']
-    voltage_local_max = find_voltage_peaks(voltage)
+    voltage_local_max = find_voltage_peaks(ap_data['Voltage (V)'])
     cycle_lengths = []
     for x in range(len(voltage_local_max) - 1):
-        cycle_start = voltage_local_max[x]
-        cycle_end = voltage_local_max[x + 1]
-        single_ap_max = ap_data[cycle_start:cycle_end]
-        cycle_time = single_ap_max['Time (s)']
+        cycle_time = ap_data[voltage_local_max[x]:voltage_local_max[x + 1]]['Time (s)']
         if len(cycle_time) > 25000:
             cycle_lengths.append(cycle_lengths[-1])
         else:
