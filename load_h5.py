@@ -183,22 +183,17 @@ def get_files_in_directory(directory):
     return files_in_directory
 
 
-def get_ap_amplitude(ap_data, is_plotted=False):
+def get_ap_amplitude(ap_data, does_plot = False):
     ap_amplitude = ap_data['Voltage (V)'].max() - ap_data['Voltage (V)'].min()
 
-    index = ap_data['Voltage (V)'].idxmax()
-    time_at_max = ap_data['Time (s)'].loc[index]
-    voltage_at_max = ap_data['Voltage (V)'].max()
-    voltage_at_min = ap_data['Voltage (V)'].min()
-    index2 = ap_data['Voltage (V)'].idxmin()
-    time_at_min = ap_data['Time (s)'].loc[index2]
-    if (is_plotted):
-        plt.plot(ap_data['Time (s)'], ap_data['Voltage (V)'])
-        plt.plot([time_at_min], [voltage_at_min], marker='o', markersize=5, color='red')
-        plt.plot([time_at_max], [voltage_at_max], marker='o', markersize=5, color='red')
-        plt.plot([time_at_max, time_at_max], [voltage_at_min, voltage_at_max], 'g-')
-        plt.xlabel('Time(s)')
-        plt.ylabel('Voltage(V)')
+    if (does_plot):
+        time_at_max = ap_data['Time (s)'].loc[ap_data['Voltage (V)'].idxmax()]
+        time_at_min = ap_data['Time (s)'].loc[ap_data['Voltage (V)'].idxmin()]
+        plot_single_ap(ap_data)
+        plt.plot([time_at_min], [ap_data['Voltage (V)'].min()], marker='o', markersize=5, color='red')
+        plt.plot([time_at_max], [ap_data['Voltage (V)'].max()], marker='o', markersize=5, color='red')
+        plt.plot([time_at_max, time_at_max], [ap_data['Voltage (V)'].min(), ap_data['Voltage (V)'].max()], 'g-')
+
     return ap_amplitude
 
 
@@ -270,6 +265,7 @@ def get_ap_shape_factor(ap_data):
     APD_70 = get_ap_duration(ap_data, 0.5, 0.7)
     APD_80 = get_ap_duration(ap_data, 0.5, 0.8)
     ap_shape_factor = (APD_30 - APD_40) / (APD_70 - APD_80)
+
     return ap_shape_factor
 
 
@@ -331,70 +327,35 @@ def get_various_aps(ap_data, does_plot=False):
 
     return aps
 
-
 def get_ap_vmax(ap_data, percent_up):
-    time = ap_data['Time (s)']
     voltage = ap_data['Voltage (V)']
     time_begin = ap_data['Time (s)'].idxmin()
     ap_data_pre_max = ap_data[:(voltage.idxmax() - time_begin)]
-    ap_data_post_max = ap_data[(voltage.idxmax() - time_begin):(voltage.idxmin() - time_begin)]
-    voltage_start = voltage[time_begin]
-    voltage_mid = ((voltage.max() - voltage_start) * percent_up) + voltage_start
+    voltage_mid = ((voltage.max() - voltage[time_begin]) * percent_up) + voltage[time_begin]
     voltage_mid_loc = (ap_data_pre_max['Voltage (V)'] - voltage_mid).abs().idxmin()
 
     return voltage_mid_loc
 
 
-def plot_ap_vmax(ap_data, is_plotted=False):
-    time = ap_data['Time (s)']
-    voltage = ap_data['Voltage (V)']
+def get_slope(ap_data, does_plot=False):
+    time_start_50 = ap_data['Time (s)'].loc[get_ap_vmax(ap_data, 0.45)]
+    voltage_mid_50 = ap_data['Voltage (V)'].loc[get_ap_vmax(ap_data, 0.45)]
+    time_start_85 = ap_data['Time (s)'].loc[get_ap_vmax(ap_data, 0.85)]
+    voltage_mid_85 = ap_data['Voltage (V)'].loc[get_ap_vmax(ap_data, 0.85)]
+    time_start_25 = ap_data['Time (s)'].loc[get_ap_vmax(ap_data, 0.25)]
+    voltage_mid_25 = ap_data['Voltage (V)'].loc[get_ap_vmax(ap_data, 0.25)]
+    slope = (voltage_mid_85 - voltage_mid_50) / (time_start_85 - time_start_50)
 
-    time_start_50 = time.loc[get_ap_vmax(ap_data, 0.45)]
-    voltage_mid_50 = voltage.loc[get_ap_vmax(ap_data, 0.45)]
-    time_start_85 = time.loc[get_ap_vmax(ap_data, 0.85)]
-    voltage_mid_85 = voltage.loc[get_ap_vmax(ap_data, 0.85)]
-    time_start_25 = time.loc[get_ap_vmax(ap_data, 0.25)]
-    voltage_mid_25 = voltage.loc[get_ap_vmax(ap_data, 0.25)]
-
-    if is_plotted:
-        plt.plot(ap_data['Time (s)'], ap_data['Voltage (V)'])
+    if does_plot:
+        plot_single_ap(ap_data)
+        x_number_values = [time_start_50, time_start_85, time_start_25]
+        y_number_values = [voltage_mid_50, voltage_mid_85, voltage_mid_25]
+        plt.plot(x_number_values, y_number_values, linewidth=2)
         plt.plot([time_start_50], [voltage_mid_50], 'yo')
         plt.plot([time_start_85], [voltage_mid_85], 'yo')
         plt.plot([time_start_25], [voltage_mid_25], 'yo')
 
-
-def draw_line(ap_data, is_plotted=False):
-    time = ap_data['Time (s)']
-    voltage = ap_data['Voltage (V)']
-    time_start_50 = time.loc[get_ap_vmax(ap_data, 0.45)]
-    voltage_mid_50 = voltage.loc[get_ap_vmax(ap_data, 0.45)]
-    time_start_85 = time.loc[get_ap_vmax(ap_data, 0.85)]
-    voltage_mid_85 = voltage.loc[get_ap_vmax(ap_data, 0.85)]
-    time_start_25 = time.loc[get_ap_vmax(ap_data, 0.25)]
-    voltage_mid_25 = voltage.loc[get_ap_vmax(ap_data, 0.25)]
-
-    x_number_values = [time_start_50, time_start_85, time_start_25]
-    y_number_values = [voltage_mid_50, voltage_mid_85, voltage_mid_25]
-
-    if is_plotted:
-        plt.plot(x_number_values, y_number_values, linewidth=2)
-        plt.xlabel('Time(s)')
-        plt.ylabel('Voltage(V)')
-        plt.show
-
-
-def get_slope(ap_data):
-    time = ap_data['Time (s)']
-    voltage = ap_data['Voltage (V)']
-    time_start_50 = time.loc[get_ap_vmax(ap_data, 0.45)]
-    voltage_mid_50 = voltage.loc[get_ap_vmax(ap_data, 0.45)]
-    time_start_85 = time.loc[get_ap_vmax(ap_data, 0.85)]
-    voltage_mid_85 = voltage.loc[get_ap_vmax(ap_data, 0.85)]
-    time_start_25 = time.loc[get_ap_vmax(ap_data, 0.25)]
-    voltage_mid_25 = voltage.loc[get_ap_vmax(ap_data, 0.25)]
-
-    m = (voltage_mid_85 - voltage_mid_50) / (time_start_85 - time_start_50)
-    return m
+    return slope
 
 def get_all_apds(ap_data, depolarization_percent, repolarization_percent, does_plot = False):
     cycle_lengths = get_cycle_lengths(ap_data)
@@ -470,9 +431,9 @@ def compare_aps(first_ap,second_ap):
     blue_patch = mpatches.Patch(color='C0', label='First AP')
     orange_patch = mpatches.Patch(color='C1', label='Second AP')
     plt.legend(handles=[blue_patch,orange_patch])
-    print('AP Durations:')
+    print('AP Durations (s):')
     print('First AP:',get_ap_duration(first_ap_copy,.5,.9),' Second AP:',get_ap_duration(second_ap_copy,.5,.9))
-    print('AP Amplitudes:')
+    print('AP Amplitudes (V):')
     print('First AP:',get_ap_amplitude(first_ap_copy),' Second AP:',get_ap_amplitude(second_ap_copy))
 
 filename = 'data/attempt_2_071519.h5'
