@@ -321,10 +321,13 @@ def get_various_aps(ap_data, does_plot=False):
         aps.append(get_single_ap(ap_data, random_cycle_loc))
 
     if does_plot:
+        patches = []
+        colors = ['C0', 'C1', 'C2', 'C3', 'C4']
         for x in range(number_of_aps):
             aps_copy = zero_ap_data(aps[x].reset_index())
             plot_single_ap(aps_copy)
-    print(locs)
+            patches.append(mpatches.Patch(color = colors[x], label = locs[x]))
+        plt.legend(handles = patches)
 
     return aps
 
