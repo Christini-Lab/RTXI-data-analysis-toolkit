@@ -189,10 +189,10 @@ def get_ap_amplitude(ap_data, does_plot = False):
     if (does_plot):
         time_at_max = ap_data['Time (s)'].loc[ap_data['Voltage (V)'].idxmax()]
         time_at_min = ap_data['Time (s)'].loc[ap_data['Voltage (V)'].idxmin()]
+        print('AP amplitude is ', ap_amplitude, ' volts')
         plot_single_ap(ap_data)
-        plt.plot([time_at_min], [ap_data['Voltage (V)'].min()], marker='o', markersize=5, color='red')
-        plt.plot([time_at_max], [ap_data['Voltage (V)'].max()], marker='o', markersize=5, color='red')
-        plt.plot([time_at_max, time_at_max], [ap_data['Voltage (V)'].min(), ap_data['Voltage (V)'].max()], 'g-')
+        plt.plot([time_at_max, time_at_max], [ap_data['Voltage (V)'].min(), ap_data['Voltage (V)'].max()], 'r-')
+        plt.plot([time_at_min, time_at_max], [ap_data['Voltage (V)'].min(), ap_data['Voltage (V)'].max()], 'yo')
 
     return ap_amplitude
 
@@ -212,7 +212,7 @@ def get_ap_duration(sap_data, depolarization_percent, repolarization_percent, do
     ap_duration = time_end - time_start
 
     if does_plot:
-        print('Action Potential Duration is ', ap_duration, ' seconds')
+        print('AP duration is ', ap_duration, ' seconds')
         plot_single_ap(ap_data_copy)
         plt.plot([time_start, time_end], [voltage_mid, voltage_mid], 'r-')
         plt.plot([time_start, time_end], [voltage_mid, voltage_90], 'yo')
@@ -243,28 +243,33 @@ def get_single_ap(ap_data, ap_number, does_plot=False):
     return single_ap
 
 
-def get_ap_shape_factor_points(ap_data, repolarization_percent, does_plot=False):
+def get_ap_sf_points(ap_data, repolarization_percent, does_plot=False):
     voltage = ap_data['Voltage (V)']
     time = ap_data['Time (s)']
     ap_data_post_max = ap_data[(voltage.idxmax() - time.idxmin()):(voltage.idxmin() - time.idxmin())]
     voltage_90 = voltage.min() + (get_ap_amplitude(ap_data) * (1 - repolarization_percent))
     time_end = time.loc[(ap_data_post_max['Voltage (V)'] - voltage_90).abs().idxmin()]
 
-    if does_plot:
-        plot_single_ap(ap_data)
-        plt.plot([time_end], [voltage_90], 'yo')
-        plt.xlabel('Time(s)')
-        plt.ylabel('Voltage(V)')
-
     return time_end, voltage_90
 
 
-def get_ap_shape_factor(ap_data):
+def get_ap_shape_factor(ap_data, does_plot=False):
     APD_30 = get_ap_duration(ap_data, 0.5, 0.3)
     APD_40 = get_ap_duration(ap_data, 0.5, 0.4)
     APD_70 = get_ap_duration(ap_data, 0.5, 0.7)
     APD_80 = get_ap_duration(ap_data, 0.5, 0.8)
     ap_shape_factor = (APD_30 - APD_40) / (APD_70 - APD_80)
+
+    if does_plot:
+        print("AP shape factor is ", ap_shape_factor)
+        plot_single_ap(ap_data)
+        APD_30_points = get_ap_sf_points(ap_data, .3)
+        APD_40_points = get_ap_sf_points(ap_data, .4)
+        APD_70_points = get_ap_sf_points(ap_data, .7)
+        APD_80_points = get_ap_sf_points(ap_data, .8)
+        point_voltages = [APD_30_points[1], APD_40_points[1], APD_70_points[1], APD_80_points[1]]
+        point_times = [APD_30_points[0], APD_40_points[0], APD_70_points[0], APD_80_points[0]]
+        plt.plot(point_times, point_voltages, 'yo')
 
     return ap_shape_factor
 
@@ -295,10 +300,12 @@ def plot_single_ap(sap_data):
     plt.xlabel('Time (s)')
     plt.ylabel('Voltage (V)')
 
+
 def find_voltage_peaks(voltage):
     voltage_peaks = np.ndarray.tolist(list(signal.find_peaks(voltage, distance=5000, prominence=.03, height=0))[0])
 
     return voltage_peaks
+
 
 def get_various_aps(ap_data, does_plot=False):
     cycle_lengths = get_cycle_lengths(ap_data)
@@ -327,6 +334,7 @@ def get_various_aps(ap_data, does_plot=False):
 
     return aps
 
+
 def get_ap_vmax(ap_data, percent_up):
     voltage = ap_data['Voltage (V)']
     time_begin = ap_data['Time (s)'].idxmin()
@@ -350,12 +358,12 @@ def get_slope(ap_data, does_plot=False):
         plot_single_ap(ap_data)
         x_number_values = [time_start_50, time_start_85, time_start_25]
         y_number_values = [voltage_mid_50, voltage_mid_85, voltage_mid_25]
-        plt.plot(x_number_values, y_number_values, linewidth=2)
-        plt.plot([time_start_50], [voltage_mid_50], 'yo')
-        plt.plot([time_start_85], [voltage_mid_85], 'yo')
-        plt.plot([time_start_25], [voltage_mid_25], 'yo')
+        plt.plot(x_number_values, y_number_values, 'r-')
+        plt.plot([time_start_50, time_start_85, time_start_25], [voltage_mid_50, voltage_mid_85, voltage_mid_25], 'yo')
+        print('Maximum increase velocity is ', slope, ' volts per second')
 
     return slope
+
 
 def get_all_apds(ap_data, depolarization_percent, repolarization_percent, does_plot = False):
     cycle_lengths = get_cycle_lengths(ap_data)
@@ -371,6 +379,7 @@ def get_all_apds(ap_data, depolarization_percent, repolarization_percent, does_p
 
     return apds
 
+
 def get_all_apas(ap_data, does_plot = False):
     cycle_lengths = get_cycle_lengths(ap_data)
     apas = []
@@ -384,6 +393,7 @@ def get_all_apas(ap_data, does_plot = False):
         plt.ylabel('Amplitudes (V)')
 
     return apas
+
 
 def get_ap_range(ap_data, first_ap, last_ap, does_plot = False):
     last_ap_copy = last_ap + 1
@@ -423,6 +433,7 @@ def smooth_ap_data(ap_data, degree, does_plot=False):
 
     return smoothed_ap_data
 
+
 def compare_aps(first_ap,second_ap):
     first_ap_copy = zero_ap_data(first_ap.reset_index())
     second_ap_copy = zero_ap_data(second_ap.reset_index())
@@ -435,6 +446,7 @@ def compare_aps(first_ap,second_ap):
     print('First AP:',get_ap_duration(first_ap_copy,.5,.9),' Second AP:',get_ap_duration(second_ap_copy,.5,.9))
     print('AP Amplitudes (V):')
     print('First AP:',get_ap_amplitude(first_ap_copy),' Second AP:',get_ap_amplitude(second_ap_copy))
+
 
 filename = 'data/attempt_2_071519.h5'
 # plot_all_aps(filename)
