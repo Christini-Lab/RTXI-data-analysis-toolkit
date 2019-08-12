@@ -243,7 +243,7 @@ def get_single_ap(ap_data, ap_number, does_plot=False):
     return single_ap
 
 
-def get_ap_sf_points(ap_data, repolarization_percent, does_plot=False):
+def get_ap_sf_points(ap_data, repolarization_percent):
     voltage = ap_data['Voltage (V)']
     time = ap_data['Time (s)']
     ap_data_post_max = ap_data[(voltage.idxmax() - time.idxmin()):(voltage.idxmin() - time.idxmin())]
@@ -439,9 +439,9 @@ def compare_aps(first_ap,second_ap):
     second_ap_copy = zero_ap_data(second_ap.reset_index())
     plot_single_ap(first_ap_copy)
     plot_single_ap(second_ap_copy)
-    blue_patch = mpatches.Patch(color='C0', label='First AP')
-    orange_patch = mpatches.Patch(color='C1', label='Second AP')
-    plt.legend(handles=[blue_patch,orange_patch])
+    blue_patch = mpatches.Patch(color = 'C0', label = 'First AP')
+    orange_patch = mpatches.Patch(color = 'C1', label = 'Second AP')
+    plt.legend(handles = [blue_patch,orange_patch])
     print('AP Durations (s):')
     print('First AP:',get_ap_duration(first_ap_copy,.5,.9),' Second AP:',get_ap_duration(second_ap_copy,.5,.9))
     print('AP Amplitudes (V):')
