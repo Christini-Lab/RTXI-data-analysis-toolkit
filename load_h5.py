@@ -330,7 +330,7 @@ def get_various_aps(ap_data, does_plot=False):
             aps_copy = zero_ap_data(aps[x].reset_index())
             plot_single_ap(aps_copy)
             patches.append(mpatches.Patch(color = colors[x], label = locs[x]))
-        plt.legend(handles = patches)
+        plt.legend(handles = patches, title = 'AP Indices')
 
     return aps
 
@@ -395,17 +395,28 @@ def get_all_apas(ap_data, does_plot = False):
     return apas
 
 
-def get_ap_range(ap_data, first_ap, last_ap, does_plot = False):
+def get_ap_range(ap_data, first_ap, last_ap, split, does_plot=False):
     last_ap_copy = last_ap + 1
-    ap_range = []
-    for x in range(last_ap_copy - first_ap):
-        ap_range.append(get_single_ap(ap_data, (first_ap + x)))
+    ap_range = get_single_ap(ap_data, first_ap)
+    ap_range_singles = [get_single_ap(ap_data, first_ap)]
+    for x in range(1, last_ap_copy - first_ap):
+        ap_range = pd.concat([ap_range, get_single_ap(ap_data, (first_ap + x))])
+        ap_range_singles.append(get_single_ap(ap_data, (first_ap + x)))
 
     if does_plot:
-        for x in range(last_ap_copy - first_ap):
-            plot_single_ap(ap_range[x])
+        for x in range(len(ap_range_singles)):
+            plot_single_ap(ap_range_singles[x])
+        patches = []
+        colors = ['C0', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9']
+        for x in range(len(ap_range_singles)):
+            current_color = x % 10
+            patches.append(mpatches.Patch(color=colors[current_color], label=first_ap + x))
+        plt.legend(handles = patches, loc = 'center left', bbox_to_anchor = (1.1, .5), ncol = 2, title = 'AP Indices')
 
-    return ap_range
+    if split:
+        return ap_range_singles
+    else:
+        return ap_range
 
 
 def smooth_ap_data(ap_data, degree, does_plot=False):
