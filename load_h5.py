@@ -1,3 +1,4 @@
+from __future__ import print_function
 import h5py
 import pdb
 import numpy as np
@@ -7,6 +8,8 @@ import pandas as pd
 import os
 from scipy import signal
 import random
+from ipywidgets import interact, interactive, fixed, interact_manual
+import ipywidgets as widgets
 
 
 # 2. Read in the file
@@ -458,6 +461,14 @@ def compare_aps(first_ap,second_ap):
     print('AP Amplitudes (V):')
     print('First AP:',get_ap_amplitude(first_ap_copy),' Second AP:',get_ap_amplitude(second_ap_copy))
 
+
+def no_return_sap(ap_data, ap_number, does_plot):
+    get_single_ap(ap_data, ap_number, does_plot)
+
+
+def plot_sap_slider(ap_data):
+    end = len(get_cycle_lengths(ap_data))
+    interact(no_return_sap, ap_data = fixed(ap_data), ap_number = (1,end), does_plot = fixed(True))
 
 filename = 'data/attempt_2_071519.h5'
 # plot_all_aps(filename)
