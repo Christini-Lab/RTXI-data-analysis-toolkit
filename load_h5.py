@@ -210,15 +210,14 @@ def get_ap_duration(sap_data, depolarization_percent, repolarization_percent, do
     voltage_mid = ((voltage.max() - voltage[time.idxmin()]) * depolarization_percent) + voltage[time.idxmin()]
     voltage_mid_loc = (ap_data_pre_max['Voltage (V)'] - voltage_mid).abs().idxmin()
     voltage_90 = voltage.min() + (get_ap_amplitude(ap_data_copy) * (1 - repolarization_percent))
-    time_start = time.loc[voltage_mid_loc]
     time_end = time.loc[(ap_data_max_to_min['Voltage (V)'] - voltage_90).abs().idxmin()]
-    ap_duration = time_end - time_start
+    ap_duration = time_end - time.loc[voltage_mid_loc]
 
     if does_plot:
         print('AP duration is ', ap_duration, ' seconds')
         plot_single_ap(ap_data_copy)
-        plt.plot([time_start, time_end], [voltage_mid, voltage_mid], 'r-')
-        plt.plot([time_start, time_end], [voltage_mid, voltage_90], 'yo')
+        plt.plot([time.loc[voltage_mid_loc], time_end], [voltage_mid, voltage_mid], 'r-')
+        plt.plot([time.loc[voltage_mid_loc], time_end], [voltage_mid, voltage_90], 'yo')
 
     return ap_duration
 
