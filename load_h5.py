@@ -368,12 +368,16 @@ def get_slope(ap_data, does_plot=False):
     return slope
 
 
-def get_all_apds(ap_data, depolarization_percent, repolarization_percent, does_plot = False):
-    cycle_lengths = get_cycle_lengths(ap_data)
+def get_all_apds(ap_data, depolarization_percent, repolarization_percent, does_plot=False):
     apds = []
-    for x in range(1,len(cycle_lengths)+1):
-        single_ap = get_single_ap(ap_data, x)
-        apds.append(get_ap_duration(single_ap, depolarization_percent, repolarization_percent))
+    if type(ap_data) == pd.core.frame.DataFrame:
+        cycle_lengths = get_cycle_lengths(ap_data)
+        for x in range(1, len(cycle_lengths) + 1):
+            single_ap = get_single_ap(ap_data, x)
+            apds.append(get_ap_duration(single_ap, depolarization_percent, repolarization_percent))
+    elif type(ap_data) == list:
+        for x in range(len(ap_data)):
+            apds.append(get_ap_duration(ap_data[x], depolarization_percent, repolarization_percent))
 
     if does_plot:
         plt.plot(apds)
@@ -384,11 +388,15 @@ def get_all_apds(ap_data, depolarization_percent, repolarization_percent, does_p
 
 
 def get_all_apas(ap_data, does_plot = False):
-    cycle_lengths = get_cycle_lengths(ap_data)
     apas = []
-    for x in range(1,len(cycle_lengths)+1):
-        single_ap = get_single_ap(ap_data, x)
-        apas.append(get_ap_amplitude(single_ap))
+    if type(ap_data) == pd.core.frame.DataFrame:
+        cycle_lengths = get_cycle_lengths(ap_data)
+        for x in range(1,len(cycle_lengths)+1):
+            single_ap = get_single_ap(ap_data, x)
+            apas.append(get_ap_amplitude(single_ap))
+    elif type(ap_data) == list:
+        for x in range(len(ap_data)):
+            apas.append(get_ap_amplitude(ap_data[x]))
 
     if does_plot:
         plt.plot(apas)
@@ -462,13 +470,29 @@ def compare_aps(first_ap,second_ap):
     print('First AP:',get_ap_amplitude(first_ap_copy),' Second AP:',get_ap_amplitude(second_ap_copy))
 
 
-def no_return_sap(ap_data, ap_number, does_plot):
-    get_single_ap(ap_data, ap_number, does_plot)
+def no_return_sap1(ap_data, ap_number):
+    get_single_ap(ap_data, ap_number, True)
+
+
+def no_return_sap2(ap_data, ap_number):
+    plot_single_ap(ap_data[ap_number - 1])
 
 
 def plot_sap_slider(ap_data):
-    end = len(get_cycle_lengths(ap_data))
-    interact(no_return_sap, ap_data = fixed(ap_data), ap_number = (1,end), does_plot = fixed(True))
+    if type(ap_data) == pd.core.frame.DataFrame:
+        end = len(get_cycle_lengths(ap_data))
+        interact(no_return_sap1, ap_data=fixed(ap_data), ap_number=(1, end))
+    elif type(ap_data) == list:
+        end = len(ap_data)
+        interact(no_return_sap2, ap_data=fixed(ap_data), ap_number=(1, end))
+
+
+def get_all_saps(ap_data):
+    cycle_lengths = get_cycle_lengths(ap_data)
+    all_aps = get_ap_range(ap_data, 1, cycle_lengths, True)
+
+    return all_aps
+
 
 filename = 'data/attempt_2_071519.h5'
 # plot_all_aps(filename)
