@@ -488,10 +488,49 @@ def plot_sap_slider(ap_data):
 
 
 def get_all_saps(ap_data):
-    cycle_lengths = get_cycle_lengths(ap_data)
+    cycle_lengths = len(get_cycle_lengths(ap_data))
     all_aps = get_ap_range(ap_data, 1, cycle_lengths, True)
 
     return all_aps
+
+
+def get_all_vmax(ap_data, does_plot = False):
+    vmax = []
+    if type(ap_data) == pd.core.frame.DataFrame:
+        cycle_lengths = get_cycle_lengths(ap_data)
+        for x in range(1,len(cycle_lengths)+1):
+            single_ap = get_single_ap(ap_data, x)
+            vmax.append(get_slope(single_ap))
+    elif type(ap_data) == list:
+        for x in range(len(ap_data)):
+            vmax.append(get_slope(ap_data[x]))
+
+    if does_plot:
+        plt.plot(vmax)
+        plt.xlabel('Action Potentials')
+        plt.ylabel('Maximum Increase Velocities (V/s)')
+
+    return vmax
+
+
+def get_all_sfs(ap_data, does_plot = False):
+    sfs = []
+    if type(ap_data) == pd.core.frame.DataFrame:
+        cycle_lengths = get_cycle_lengths(ap_data)
+        for x in range(1,len(cycle_lengths)+1):
+            single_ap = get_single_ap(ap_data, x)
+            sfs.append(get_ap_shape_factor(single_ap))
+    elif type(ap_data) == list:
+        for x in range(len(ap_data)):
+            sfs.append(get_ap_shape_factor(ap_data[x]))
+
+    if does_plot:
+        plt.plot(sfs)
+        plt.xlabel('Action Potentials')
+        plt.ylabel('Shape Factors')
+
+    return sfs
+
 
 
 filename = 'data/attempt_2_071519.h5'
