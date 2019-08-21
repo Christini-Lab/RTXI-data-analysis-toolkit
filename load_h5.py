@@ -531,6 +531,120 @@ def get_all_sfs(ap_data, does_plot = False):
     return sfs
 
 
+def is_spontaneous(ap_data, peak):
+    spontaneous = False
+    cycle_length = len(ap_data)
+    smoothed = np.convolve(ap_data['Voltage (V)'], np.ones((50,)) / 50, mode='valid')
+    slope = np.convolve(np.diff(smoothed), np.ones((50,)) / 50, mode='valid')
+    time_start = ap_data['Time (s)'].min()
+    time_start_loc = ap_data['Time (s)'].idxmin()
+    start = peak - int(cycle_length / 5) - int(time_start_loc)
+    end = peak - int(cycle_length / 10) - int(time_start_loc)
+    before_upslope = slope[start:end]
+    if np.average(before_upslope) > .000002 and spontaneous == False:
+        spontaneous = True
+
+    return spontaneous
+
+
+def get_classes(need_to_classify):
+    classified = []
+    while len(need_to_classify) > 0:
+        random_cycle_num = random.randint(0, len(need_to_classify) - 1)
+        random_cycle = need_to_classify[random_cycle_num]
+        random_cycle_length = random_cycle[1]
+        this_class = []
+        pop_it = []
+        average = 0
+        for x in range(len(need_to_classify)):
+            this_cycle = need_to_classify[x]
+            difference = abs(this_cycle[1] - random_cycle_length)
+            if difference < 100:
+                this_class.append(need_to_classify[x])
+                pop_it.append(x)
+        for x in range(len(pop_it) - 1, -1, -1):
+            need_to_classify.pop(pop_it[x])
+        for x in range(len(this_class)):
+            current_cycle = this_class[x]
+            average = average + (current_cycle[1] / 10000)
+        average = average / len(this_class)
+        class_number = round((1 / average), 1)
+        for x in this_class:
+            classified.append((x[0], f'not_spontaneous_{class_number}'))
+
+    return classified
+
+
+def get_everything(ap_data):
+    peaks = find_voltage_peaks(ap_data['Voltage (V)'])
+    all_saps = get_all_saps(ap_data)
+    cycle_lengths = get_cycle_lengths(ap_data)
+    apd30s = get_all_apds(all_saps, .5, .3)
+    apd40s = get_all_apds(all_saps, .5, .4)
+    apd70s = get_all_apds(all_saps, .5, .7)
+    apd80s = get_all_apds(all_saps, .5, .8)
+    apd90s = get_all_apds(all_saps, .5, .9)
+    apas = get_all_apas(all_saps)
+    sfs = get_all_sfs(all_saps)
+    vmaxs = get_all_vmax(all_saps)
+    classes = []
+    mdps = []
+    start_times = []
+    end_times = []
+    need_to_classify = []
+    for x in range(len(all_saps)):
+        single_ap = all_saps[x]
+        start_times.append(single_ap['Time (s)'].idxmin())
+        end_times.append(single_ap['Time (s)'].idxmax())
+        mdps.append(single_ap['Voltage (V)'].min())
+        spontaneous = is_spontaneous(single_ap, peaks[x])
+        if spontaneous:
+            classes.append('Spontaneous')
+        else:
+            classes.append('')
+            need_to_classify.append((x, cycle_lengths[x]))
+    classified = get_classes(need_to_classify)
+    for x in range(len(classified)):
+        classes[classified[x][0]] = classified[x][1]
+    dict = {'Start': start_times, 'End': end_times, 'Class': classes, 'Cycle Lengths': cycle_lengths,
+            'Duration 30%': apd30s, 'Duration 40%': apd40s, 'Duration 70%': apd70s, 'Duration 80%': apd80s,
+            'Duration 90%': apd90s, 'Amplitude': apas, 'MDP': mdps, 'Shape Factor': sfs, 'dv/dt max': vmaxs}
+    everything = pd.DataFrame(dict)
+
+    everything.to_csv('data/sap_summary_data.csv')
+
+    return everything
+
+
+def load_everything_dataframe(filename):
+    df = pd.read_csv(filename)
+
+    return df
+
+
+def get_saps_from_data_table(ap_data, data_table):
+    start_times = data_table['Start']
+    end_times = data_table['End']
+    all_saps = []
+    for x in range(len(start_times)):
+        single_ap = ap_data[start_times[x]:end_times[x]]
+        all_saps.append(single_ap)
+
+    return all_saps
+
+
+def get_apdn_apdn1(ap_data, depolarization_percent, repolarization_percent, does_plot=False):
+    all_apds = get_all_apds(ap_data, depolarization_percent, repolarization_percent)
+    apdn_apdn1 = []
+    for x in range(len(all_apds) - 1):
+        apdn_apdn1.append(all_apds[x] - all_apds[x + 1])
+
+    if does_plot:
+        plt.plot(apdn_apdn1)
+
+    return apdn_apdn1
+
+
 
 filename = 'data/attempt_2_071519.h5'
 # plot_all_aps(filename)
