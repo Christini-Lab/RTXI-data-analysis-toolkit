@@ -536,7 +536,6 @@ def is_spontaneous(ap_data, peak):
     cycle_length = len(ap_data)
     smoothed = np.convolve(ap_data['Voltage (V)'], np.ones((50,)) / 50, mode='valid')
     slope = np.convolve(np.diff(smoothed), np.ones((50,)) / 50, mode='valid')
-    time_start = ap_data['Time (s)'].min()
     time_start_loc = ap_data['Time (s)'].idxmin()
     start = peak - int(cycle_length / 5) - int(time_start_loc)
     end = peak - int(cycle_length / 10) - int(time_start_loc)
@@ -643,6 +642,43 @@ def get_apdn_apdn1(ap_data, depolarization_percent, repolarization_percent, does
         plt.plot(apdn_apdn1)
 
     return apdn_apdn1
+
+
+def get_diastolic_intervals(ap_data, does_plot=False):
+    peaks = find_voltage_peaks(ap_data['Voltage (V)'])
+    diastolic_intervals = ['NA']
+    plotted_intervals = []
+    for x in range(len(peaks) - 1):
+        max_to_max = (ap_data[peaks[x]:peaks[x + 1] + 500])
+        if len(max_to_max) > 25000:
+            spontaneous = True
+        else:
+            spontaneous = is_spontaneous(max_to_max, peaks[x + 1])
+        if spontaneous:
+            diastolic_intervals.append('NA')
+        else:
+            max_to_max_volts = max_to_max.reset_index()['Voltage (V)']
+            found_end = False
+            found_start = False
+            for x in range(len(max_to_max_volts)):
+                if x + 500 < len(max_to_max_volts):
+                    if (max_to_max_volts[x] - max_to_max_volts[x + 500] < 0.003) and found_end == False:
+                        end = x
+                        found_end = True
+                    if (max_to_max_volts[x] - max_to_max_volts[
+                        x + 500] > 0.02) and found_end == True and found_start == False:
+                        start = x
+                        found_start = True
+            time = max_to_max.reset_index()['Time (s)']
+            diastolic_intervals.append(time[start] - time[end])
+            plotted_intervals.append(time[start] - time[end])
+
+    if does_plot:
+        plt.plot(plotted_intervals)
+        plt.xlabel('Action Potentials')
+        plt.ylabel('Diastolic Intervals (s)')
+
+    return diastolic_intervals
 
 
 
