@@ -569,15 +569,25 @@ def get_classes(need_to_classify):
         average = average / len(this_class)
         class_number = round((1 / average), 1)
         for x in this_class:
-            classified.append((x[0], f'not_spontaneous_{class_number}'))
+            classified.append((x[0], f'non_spontaneous_{class_number}_Hz'))
 
     return classified
+
+
+def get_mdp(single_ap):
+    mdp = single_ap['Voltage (V)'].min()
+
+    return mdp
 
 
 def get_everything(ap_data):
     peaks = find_voltage_peaks(ap_data['Voltage (V)'])
     all_saps = get_all_saps(ap_data)
     cycle_lengths = get_cycle_lengths(ap_data)
+    cl = []
+    for x in cycle_lengths:
+        cl.append(x / 10000)
+    dis = get_diastolic_intervals(ap_data)
     apd30s = get_all_apds(all_saps, .5, .3)
     apd40s = get_all_apds(all_saps, .5, .4)
     apd70s = get_all_apds(all_saps, .5, .7)
@@ -595,19 +605,19 @@ def get_everything(ap_data):
         single_ap = all_saps[x]
         start_times.append(single_ap['Time (s)'].idxmin())
         end_times.append(single_ap['Time (s)'].idxmax())
-        mdps.append(single_ap['Voltage (V)'].min())
+        mdps.append(get_mdp(single_ap))
         spontaneous = is_spontaneous(single_ap, peaks[x])
         if spontaneous:
-            classes.append('Spontaneous')
+            classes.append('spontaneous')
         else:
             classes.append('')
             need_to_classify.append((x, cycle_lengths[x]))
     classified = get_classes(need_to_classify)
     for x in range(len(classified)):
         classes[classified[x][0]] = classified[x][1]
-    dict = {'Start': start_times, 'End': end_times, 'Class': classes, 'Cycle Lengths': cycle_lengths,
-            'Duration 30%': apd30s, 'Duration 40%': apd40s, 'Duration 70%': apd70s, 'Duration 80%': apd80s,
-            'Duration 90%': apd90s, 'Amplitude': apas, 'MDP': mdps, 'Shape Factor': sfs, 'dv/dt max': vmaxs}
+    dict = {'Start': start_times, 'End': end_times, 'Class': classes, 'Cycle Lengths (s)': cl, 'Diastolic Intervals pre-AP (s)': dis,
+            'Duration 30% (s)': apd30s, 'Duration 40% (s)': apd40s, 'Duration 70% (s)': apd70s, 'Duration 80% (s)': apd80s,
+            'Duration 90% (s)': apd90s, 'Amplitude (V)': apas, 'MDP (V)': mdps, 'Shape Factor': sfs, 'dv/dt Max (V/s)': vmaxs}
     everything = pd.DataFrame(dict)
 
     everything.to_csv('data/sap_summary_data.csv')
@@ -646,7 +656,7 @@ def get_apdn_apdn1(ap_data, depolarization_percent, repolarization_percent, does
 
 def get_diastolic_intervals(ap_data, does_plot=False):
     peaks = find_voltage_peaks(ap_data['Voltage (V)'])
-    diastolic_intervals = ['NA']
+    diastolic_intervals = []
     plotted_intervals = []
     for x in range(len(peaks) - 1):
         max_to_max = (ap_data[peaks[x]:peaks[x + 1] + 500])
@@ -679,6 +689,34 @@ def get_diastolic_intervals(ap_data, does_plot=False):
         plt.ylabel('Diastolic Intervals (s)')
 
     return diastolic_intervals
+
+
+def get_class_tags(data_table, does_plot=False):
+    classes = data_table.copy()['Class']
+    class_tags = []
+    while len(classes) > 0:
+        index_ = range(len(classes))
+        classes.index = index_
+        this_class = classes[0]
+        num_in_class = 0
+        pop_it = []
+        for x in range(len(classes)):
+            if classes[x] == classes[0]:
+                pop_it.append(x)
+                num_in_class += 1
+        for x in range(len(pop_it) - 1, -1, -1):
+            classes.pop(pop_it[x])
+        class_tags.append((this_class, num_in_class))
+
+    if does_plot:
+        for x in range(len(class_tags)):
+            this_tag = class_tags[x]
+            if this_tag[1] == 1:
+                print(this_tag[1], this_tag[0], 'action potential')
+            else:
+                print(this_tag[1], this_tag[0], 'action potentials')
+
+    return class_tags
 
 
 
