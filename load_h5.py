@@ -691,7 +691,7 @@ def get_diastolic_intervals(ap_data, does_plot=False):
     return diastolic_intervals
 
 
-def get_class_tags(data_table, does_plot=False):
+def get_class_tags(ap_data, data_table, does_plot=False):
     classes = data_table.copy()['Class']
     class_tags = []
     while len(classes) > 0:
@@ -707,16 +707,50 @@ def get_class_tags(data_table, does_plot=False):
         for x in range(len(pop_it) - 1, -1, -1):
             classes.pop(pop_it[x])
         class_tags.append((this_class, num_in_class))
+    for x in range(len(class_tags)):
+        this_tag = class_tags[x]
+        if this_tag[1] == 1:
+            print(this_tag[1], this_tag[0], 'action potential')
+        else:
+            print(this_tag[1], this_tag[0], 'action potentials')
 
     if does_plot:
+        start = data_table['Start']
+        end = data_table['End']
+        patches = []
         for x in range(len(class_tags)):
-            this_tag = class_tags[x]
-            if this_tag[1] == 1:
-                print(this_tag[1], this_tag[0], 'action potential')
+            this_class_tag = class_tags[x]
+            if x == 0:
+                random_ap_num = random.randint(0, (this_class_tag[1] - 1))
+                single_ap = ap_data[start[random_ap_num]:end[random_ap_num]]
+                aps_copy = zero_ap_data(single_ap.reset_index())
+                plot_single_ap(aps_copy)
+                patches.append(mpatches.Patch(color='C0', label=(this_class_tag[0], random_ap_num)))
             else:
-                print(this_tag[1], this_tag[0], 'action potentials')
+                class_begin = 0
+                for i in range(x):
+                    prev_class_tag = class_tags[i]
+                    class_begin += prev_class_tag[1]
+                random_ap_num = random.randint(class_begin, (class_begin + this_class_tag[1] - 1))
+                single_ap = ap_data[start[random_ap_num]:end[random_ap_num]]
+                aps_copy = zero_ap_data(single_ap.reset_index())
+                plot_single_ap(aps_copy)
+                patches.append(mpatches.Patch(color=f'C{x}', label=(this_class_tag[0], random_ap_num)))
+        plt.legend(handles=patches, loc='center left', bbox_to_anchor=(1.1, .5), ncol=1, title='AP Indices')
 
     return class_tags
+
+
+def faster_smoothing(ap_data, window, does_plot=False):
+    smoothed_data = ap_data.copy()
+    smoothed_voltage = np.convolve(ap_data['Voltage (V)'], np.ones((window,)) / window, mode='same')
+    print(smoothed_voltage)
+    smoothed_data['Voltage (V)'] = smoothed_voltage
+
+    if does_plot:
+        plot_single_ap(smoothed_data)
+
+    return smoothed_data
 
 
 
