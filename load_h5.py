@@ -580,7 +580,7 @@ def get_mdp(single_ap):
     return mdp
 
 
-def get_everything(ap_data):
+def get_everything(ap_data, filename):
     peaks = find_voltage_peaks(ap_data['Voltage (V)'])
     all_saps = get_all_saps(ap_data)
     cycle_lengths = get_cycle_lengths(ap_data)
@@ -620,13 +620,13 @@ def get_everything(ap_data):
             'Duration 90% (s)': apd90s, 'Amplitude (V)': apas, 'MDP (V)': mdps, 'Shape Factor': sfs, 'dv/dt Max (V/s)': vmaxs}
     everything = pd.DataFrame(dict)
 
-    everything.to_csv('data/sap_summary_data.csv')
+    everything.to_csv(f'data/{filename}.csv')
 
     return everything
 
 
 def load_everything_dataframe(filename):
-    df = pd.read_csv(filename)
+    df = pd.read_csv(f'data/{filename}.csv')
 
     return df
 
@@ -751,6 +751,18 @@ def faster_smoothing(ap_data, window, does_plot=False):
         plot_single_ap(smoothed_data)
 
     return smoothed_data
+
+
+def load_recorded_data(filename, trial_number, does_plot=False):
+    f = load_h5(f'data/{filename}')
+    recorded_data = get_exp_as_df(f, trial_number)
+    tags = get_tags(f, trial_number)
+
+    if does_plot:
+        print(tags)
+        plot_V_and_I(recorded_data)
+
+    return recorded_data
 
 
 
