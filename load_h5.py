@@ -773,27 +773,43 @@ def load_recorded_data(filename, trial_number, does_plot=False):
     return recorded_data
 
 
-def graph_column(data_table, column):
-    if column == 'cycle lengths':
+def graph_column(data_table, trait):
+    if trait == 'cycle lengths':
         tag = 'Cycle Lengths (s)'
-    if column == 'diastolic intervals':
+    elif trait == 'diastolic intervals':
         tag = 'Diastolic Intervals pre-AP (s)'
-    if 'duration' in column:
-        temp = re.findall(r'\d+', column)
+    elif 'duration' in trait:
+        temp = re.findall(r'\d+', trait)
         res = list(map(int, temp))[0]
         tag = f'Duration {res}% (s)'
-    if column == 'amplitude':
+    elif trait == 'amplitude':
         tag = 'Amplitude (V)'
-    if column == 'mdp':
+    elif trait == 'mdp':
         tag = 'MDP (V)'
-    if column == 'shape factor':
+    elif trait == 'shape factor':
         tag = 'Shape Factor'
-    if column == 'dv/dt max':
+    elif trait == 'dv/dt max':
         tag = 'dv/dt Max (V/s)'
-    column_index = tag
-    plt.ylabel(tag)
-    plt.plot(data_table[column_index])
-    plt.xlabel('Action Potentials')
+    if trait == 'restitution curve':
+        plot_restitution_curve(data_table)
+    else:
+        column_index = tag
+        plt.ylabel(tag)
+        plt.plot(data_table[column_index])
+        plt.xlabel('Action Potentials')
+
+
+def graph_column_interact(data_table):
+    list_of_choices = ['cycle lengths','diastolic intervals', 'restitution curve', 'duration 30', 'duration 40', 'duration 70', 'duration 80', 'duration 90', 'amplitude', 'mdp', 'shape factor', 'dv/dt max']
+    interact(graph_column, data_table = fixed(data_table), trait = list_of_choices)
+
+
+def plot_restitution_curve(data_table):
+    di_list = list(data_table['Diastolic Intervals pre-AP (s)'])
+    apd_list = list(data_table[f'Duration 90% (s)'])
+    plt.plot(di_list,apd_list)
+    plt.ylabel('Duration 90% (s)')
+    plt.xlabel('Diastolic Intervals pre-AP (s)')
 
 
 
