@@ -10,6 +10,7 @@ from scipy import signal
 import random
 from ipywidgets import interact, interactive, fixed, interact_manual
 import ipywidgets as widgets
+import re
 
 
 # 2. Read in the file
@@ -337,7 +338,7 @@ def get_various_aps(ap_data, does_plot=False):
     return aps
 
 
-def get_ap_vmax(ap_data, percent_up):
+def get_upstroke_point(ap_data, percent_up):
     voltage = ap_data['Voltage (V)']
     time_begin = ap_data['Time (s)'].idxmin()
     ap_data_pre_max = ap_data[:(voltage.idxmax() - time_begin)]
@@ -348,23 +349,29 @@ def get_ap_vmax(ap_data, percent_up):
 
 
 def get_slope(ap_data, does_plot=False):
-    time_start_50 = ap_data['Time (s)'].loc[get_ap_vmax(ap_data, 0.45)]
-    voltage_mid_50 = ap_data['Voltage (V)'].loc[get_ap_vmax(ap_data, 0.45)]
-    time_start_85 = ap_data['Time (s)'].loc[get_ap_vmax(ap_data, 0.85)]
-    voltage_mid_85 = ap_data['Voltage (V)'].loc[get_ap_vmax(ap_data, 0.85)]
-    time_start_25 = ap_data['Time (s)'].loc[get_ap_vmax(ap_data, 0.25)]
-    voltage_mid_25 = ap_data['Voltage (V)'].loc[get_ap_vmax(ap_data, 0.25)]
-    slope = (voltage_mid_85 - voltage_mid_50) / (time_start_85 - time_start_50)
+    smoothed = np.convolve(ap_data['Voltage (V)'], np.ones((50,)) / 50, mode='valid')
+    slope = np.diff(smoothed)
+    index_max = np.argmax(slope)
+    ap_data_copy = (pd.DataFrame.reset_index(ap_data.copy()))
+    max_slope_v = ap_data_copy['Voltage (V)'][index_max]
+    max_slope_t = ap_data_copy['Time (s)'][index_max]
+    max_slope = slope.max() * 10000
 
     if does_plot:
-        plot_single_ap(ap_data)
-        x_number_values = [time_start_50, time_start_85, time_start_25]
-        y_number_values = [voltage_mid_50, voltage_mid_85, voltage_mid_25]
-        plt.plot(x_number_values, y_number_values, 'r-')
-        plt.plot([time_start_50, time_start_85, time_start_25], [voltage_mid_50, voltage_mid_85, voltage_mid_25], 'yo')
-        print('Maximum increase velocity is ', slope, ' volts per second')
+        plot_single_ap(ap_data_copy)
+        point_peak = get_upstroke_point(ap_data, 1)
+        time_peak = ap_data['Time (s)'].loc[point_peak]
+        voltage_peak = ap_data['Voltage (V)'].loc[point_peak]
+        point_bottom = get_upstroke_point(ap_data, 0.2)
+        time_bottom = ap_data['Time (s)'].loc[point_bottom]
+        voltage_bottom = ap_data['Voltage (V)'].loc[point_bottom]
+        t_number_values = [time_bottom, max_slope_t, time_peak]
+        v_number_values = [voltage_bottom, max_slope_v, voltage_peak]
+        plt.plot(t_number_values, v_number_values, 'r-')
+        plt.plot([max_slope_t], [max_slope_v], 'yo')
+        print('Maximum increase velocity is ', max_slope, ' volts per second')
 
-    return slope
+    return max_slope
 
 
 def get_all_apds(ap_data, depolarization_percent, repolarization_percent, does_plot=False):
@@ -627,8 +634,9 @@ def get_everything(ap_data, filename):
 
 def load_everything_dataframe(filename):
     df = pd.read_csv(f'data/{filename}.csv')
+    everything = df.drop('Unnamed: 0', axis=1)
 
-    return df
+    return everything
 
 
 def get_saps_from_data_table(ap_data, data_table):
@@ -665,7 +673,7 @@ def get_diastolic_intervals(ap_data, does_plot=False):
         else:
             spontaneous = is_spontaneous(max_to_max, peaks[x + 1])
         if spontaneous:
-            diastolic_intervals.append('NA')
+            diastolic_intervals.append('nan')
         else:
             max_to_max_volts = max_to_max.reset_index()['Voltage (V)']
             found_end = False
@@ -763,6 +771,29 @@ def load_recorded_data(filename, trial_number, does_plot=False):
         plot_V_and_I(recorded_data)
 
     return recorded_data
+
+
+def graph_column(data_table, column):
+    if column == 'cycle lengths':
+        tag = 'Cycle Lengths (s)'
+    if column == 'diastolic intervals':
+        tag = 'Diastolic Intervals pre-AP (s)'
+    if 'duration' in column:
+        temp = re.findall(r'\d+', column)
+        res = list(map(int, temp))[0]
+        tag = f'Duration {res}% (s)'
+    if column == 'amplitude':
+        tag = 'Amplitude (V)'
+    if column == 'mdp':
+        tag = 'MDP (V)'
+    if column == 'shape factor':
+        tag = 'Shape Factor'
+    if column == 'dv/dt max':
+        tag = 'dv/dt Max (V/s)'
+    column_index = tag
+    plt.ylabel(tag)
+    plt.plot(data_table[column_index])
+    plt.xlabel('Action Potentials')
 
 
 
