@@ -581,8 +581,15 @@ def get_classes(need_to_classify):
     return classified
 
 
-def get_mdp(single_ap):
+def get_mdp(single_ap, does_plot=False):
     mdp = single_ap['Voltage (V)'].min()
+
+    if does_plot:
+        mdp_loc = single_ap['Voltage (V)'].idxmin()
+        mdp_time = single_ap['Time (s)'][mdp_loc]
+        print('Maximum diastolic potential is ', mdp, ' volts')
+        plot_single_ap(single_ap)
+        plt.plot([mdp_time], [mdp], 'yo')
 
     return mdp
 
