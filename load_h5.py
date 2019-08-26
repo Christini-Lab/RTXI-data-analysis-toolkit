@@ -231,12 +231,9 @@ def get_single_ap(ap_data, ap_number, does_plot=False):
     single_ap_max = ap_data[cycle_start:voltage_local_max[ap_number]]
     if len(single_ap_max['Time (s)']) > 25000:
         ap_start = cycle_start - 5000
+        ap_end = cycle_start + 5000
     else:
         ap_start = cycle_start - int(len(single_ap_max['Time (s)']) / 4)
-    ap_data_post_max = ap_data[(ap_data['Voltage (V)'].idxmax() - ap_data['Time (s)'].idxmin()):]
-    if (ap_data_post_max['Voltage (V)'].idxmin() - cycle_start) > 6000:
-        ap_end = cycle_start + 7500
-    else:
         ap_end = ap_start + len(single_ap_max['Time (s)'])
     single_ap = ap_data[ap_start:ap_end]
 
@@ -417,8 +414,9 @@ def get_ap_range(ap_data, first_ap, last_ap, split, does_plot=False):
     ap_range = get_single_ap(ap_data, first_ap)
     ap_range_singles = [get_single_ap(ap_data, first_ap)]
     for x in range(1, last_ap_copy - first_ap):
-        ap_range = pd.concat([ap_range, get_single_ap(ap_data, (first_ap + x))])
-        ap_range_singles.append(get_single_ap(ap_data, (first_ap + x)))
+        this_sap = get_single_ap(ap_data, (first_ap + x))
+        ap_range = pd.concat([ap_range, this_sap])
+        ap_range_singles.append(this_sap)
 
     if does_plot:
         for x in range(len(ap_range_singles)):
@@ -547,7 +545,7 @@ def is_spontaneous(ap_data, peak):
     start = peak - int(cycle_length / 5) - int(time_start_loc)
     end = peak - int(cycle_length / 10) - int(time_start_loc)
     before_upslope = slope[start:end]
-    if np.average(before_upslope) > .000002 and spontaneous == False:
+    if np.average(before_upslope) > .0000018 and spontaneous == False:
         spontaneous = True
 
     return spontaneous
@@ -596,12 +594,12 @@ def get_mdp(single_ap, does_plot=False):
 
 def get_ap_features(ap_data, filename):
     peaks = find_voltage_peaks(ap_data['Voltage (V)'])
+    dis = get_diastolic_intervals(ap_data)
     all_saps = get_all_saps(ap_data)
     cycle_lengths = get_cycle_lengths(ap_data)
     cl = []
     for x in cycle_lengths:
         cl.append(x / 10000)
-    dis = get_diastolic_intervals(ap_data)
     apd30s = get_all_apds(all_saps, .5, .3)
     apd40s = get_all_apds(all_saps, .5, .4)
     apd70s = get_all_apds(all_saps, .5, .7)
@@ -635,8 +633,9 @@ def get_ap_features(ap_data, filename):
     ap_features = pd.DataFrame(dict)
 
     ap_features.to_csv(f'data/{filename}.csv')
+    ap_features_final = load_ap_features(filename)
 
-    return ap_features
+    return ap_features_final
 
 
 def load_ap_features(filename):
@@ -678,9 +677,9 @@ def get_diastolic_intervals(ap_data, does_plot=False):
         if len(max_to_max) > 25000:
             spontaneous = True
         else:
-            spontaneous = is_spontaneous(max_to_max, peaks[x + 1])
+            spontaneous = is_spontaneous(max_to_max, peaks[x])
         if spontaneous:
-            diastolic_intervals.append('nan')
+            diastolic_intervals.append('NaN')
         else:
             max_to_max_volts = max_to_max.reset_index()['Voltage (V)']
             found_end = False
