@@ -594,7 +594,7 @@ def get_mdp(single_ap, does_plot=False):
     return mdp
 
 
-def get_everything(ap_data, filename):
+def get_ap_features(ap_data, filename):
     peaks = find_voltage_peaks(ap_data['Voltage (V)'])
     all_saps = get_all_saps(ap_data)
     cycle_lengths = get_cycle_lengths(ap_data)
@@ -632,18 +632,18 @@ def get_everything(ap_data, filename):
     dict = {'Start': start_times, 'End': end_times, 'Class': classes, 'Cycle Lengths (s)': cl, 'Diastolic Intervals pre-AP (s)': dis,
             'Duration 30% (s)': apd30s, 'Duration 40% (s)': apd40s, 'Duration 70% (s)': apd70s, 'Duration 80% (s)': apd80s,
             'Duration 90% (s)': apd90s, 'Amplitude (V)': apas, 'MDP (V)': mdps, 'Shape Factor': sfs, 'dv/dt Max (V/s)': vmaxs}
-    everything = pd.DataFrame(dict)
+    ap_features = pd.DataFrame(dict)
 
-    everything.to_csv(f'data/{filename}.csv')
+    ap_features.to_csv(f'data/{filename}.csv')
 
-    return everything
+    return ap_features
 
 
-def load_everything_dataframe(filename):
+def load_ap_features(filename):
     df = pd.read_csv(f'data/{filename}.csv')
-    everything = df.drop('Unnamed: 0', axis=1)
+    ap_features = df.drop('Unnamed: 0', axis=1)
 
-    return everything
+    return ap_features
 
 
 def get_saps_from_data_table(ap_data, data_table):
@@ -780,24 +780,24 @@ def load_recorded_data(filename, trial_number, does_plot=False):
     return recorded_data
 
 
-def graph_column(data_table, trait):
-    if trait == 'cycle lengths':
+def graph_column(data_table, feature):
+    if feature == 'cycle lengths':
         tag = 'Cycle Lengths (s)'
-    elif trait == 'diastolic intervals':
+    elif feature == 'diastolic intervals':
         tag = 'Diastolic Intervals pre-AP (s)'
-    elif 'duration' in trait:
-        temp = re.findall(r'\d+', trait)
+    elif 'duration' in feature:
+        temp = re.findall(r'\d+', feature)
         res = list(map(int, temp))[0]
         tag = f'Duration {res}% (s)'
-    elif trait == 'amplitude':
+    elif feature == 'amplitude':
         tag = 'Amplitude (V)'
-    elif trait == 'mdp':
+    elif feature == 'mdp':
         tag = 'MDP (V)'
-    elif trait == 'shape factor':
+    elif feature == 'shape factor':
         tag = 'Shape Factor'
-    elif trait == 'dv/dt max':
+    elif feature == 'dv/dt max':
         tag = 'dv/dt Max (V/s)'
-    if trait == 'restitution curve':
+    if feature == 'restitution curve':
         plot_restitution_curve(data_table)
     else:
         column_index = tag
@@ -808,13 +808,13 @@ def graph_column(data_table, trait):
 
 def graph_column_interact(data_table):
     list_of_choices = ['cycle lengths','diastolic intervals', 'restitution curve', 'duration 30', 'duration 40', 'duration 70', 'duration 80', 'duration 90', 'amplitude', 'mdp', 'shape factor', 'dv/dt max']
-    interact(graph_column, data_table = fixed(data_table), trait = list_of_choices)
+    interact(graph_column, data_table = fixed(data_table), feature = list_of_choices)
 
 
 def plot_restitution_curve(data_table):
     di_list = list(data_table['Diastolic Intervals pre-AP (s)'])
     apd_list = list(data_table[f'Duration 90% (s)'])
-    plt.plot(di_list,apd_list)
+    plt.scatter(di_list,apd_list)
     plt.ylabel('Duration 90% (s)')
     plt.xlabel('Diastolic Intervals pre-AP (s)')
 
