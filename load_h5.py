@@ -302,7 +302,7 @@ def plot_single_ap(sap_data):
 
 
 def find_voltage_peaks(voltage):
-    voltage_peaks = np.ndarray.tolist(list(signal.find_peaks(voltage, distance=5000, prominence=.03, height=0))[0])
+    voltage_peaks = np.ndarray.tolist(list(signal.find_peaks(voltage, distance=4500, prominence=.03, height=0))[0])
 
     return voltage_peaks
 
@@ -664,6 +664,9 @@ def get_apdn_apdn1(ap_data, depolarization_percent, repolarization_percent, does
 
     if does_plot:
         plt.plot(apdn_apdn1)
+        plt.xlabel('Action Potentials')
+        display_percent = repolarization_percent*100
+        plt.ylabel(f'APD {display_percent}%n - APD {display_percent}%n+1 (V)')
 
     return apdn_apdn1
 
@@ -798,6 +801,8 @@ def graph_column(data_table, feature):
         tag = 'dv/dt Max (V/s)'
     if feature == 'restitution curve':
         plot_restitution_curve(data_table)
+    elif feature == 'apdn - apdn+1':
+        get_apdn_apdn1_with_apds(data_table['Duration 90% (s)'], 90, True)
     else:
         column_index = tag
         plt.ylabel(tag)
@@ -806,7 +811,7 @@ def graph_column(data_table, feature):
 
 
 def graph_column_interact(data_table):
-    list_of_choices = ['cycle lengths','diastolic intervals', 'restitution curve', 'duration 30', 'duration 40', 'duration 70', 'duration 80', 'duration 90', 'amplitude', 'mdp', 'shape factor', 'dv/dt max']
+    list_of_choices = ['cycle lengths','diastolic intervals', 'restitution curve', 'duration 30', 'duration 40', 'duration 70', 'duration 80', 'duration 90', 'apdn - apdn+1', 'amplitude', 'mdp', 'shape factor', 'dv/dt max']
     interact(graph_column, data_table = fixed(data_table), feature = list_of_choices)
 
 
@@ -817,6 +822,18 @@ def plot_restitution_curve(data_table):
     plt.ylabel('Duration 90% (s)')
     plt.xlabel('Diastolic Intervals pre-AP (s)')
 
+
+def get_apdn_apdn1_with_apds(apd_data, display_percent, does_plot=False):
+    apdn_apdn1 = []
+    for x in range(len(apd_data) - 1):
+        apdn_apdn1.append(apd_data[x] - apd_data[x + 1])
+
+    if does_plot:
+        plt.plot(apdn_apdn1)
+        plt.xlabel('Action Potentials')
+        plt.ylabel(f'APD {display_percent}%n - APD {display_percent}%n+1 (V)')
+
+    return apdn_apdn1
 
 
 filename = 'data/attempt_2_071519.h5'
