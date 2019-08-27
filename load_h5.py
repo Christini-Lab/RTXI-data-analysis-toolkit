@@ -378,11 +378,17 @@ def get_all_apds(ap_data, depolarization_percent, repolarization_percent, does_p
     if type(ap_data) == pd.core.frame.DataFrame:
         cycle_lengths = get_cycle_lengths(ap_data)
         for x in range(1, len(cycle_lengths) + 1):
-            single_ap = get_single_ap(ap_data, x)
-            apds.append(get_ap_duration(single_ap, depolarization_percent, repolarization_percent))
+            try:
+                single_ap = get_single_ap(ap_data, x)
+                apds.append(get_ap_duration(single_ap, depolarization_percent, repolarization_percent))
+            except:
+                apds.append('NaN')
     elif type(ap_data) == list:
         for x in range(len(ap_data)):
-            apds.append(get_ap_duration(ap_data[x], depolarization_percent, repolarization_percent))
+            try:
+                apds.append(get_ap_duration(ap_data[x], depolarization_percent, repolarization_percent))
+            except:
+                apds.append('NaN')
 
     if does_plot:
         plt.plot(apds)
@@ -397,11 +403,17 @@ def get_all_apas(ap_data, does_plot = False):
     if type(ap_data) == pd.core.frame.DataFrame:
         cycle_lengths = get_cycle_lengths(ap_data)
         for x in range(1,len(cycle_lengths)+1):
-            single_ap = get_single_ap(ap_data, x)
-            apas.append(get_ap_amplitude(single_ap))
+            try:
+                single_ap = get_single_ap(ap_data, x)
+                apas.append(get_ap_amplitude(single_ap))
+            except:
+                apas.append('NaN')
     elif type(ap_data) == list:
         for x in range(len(ap_data)):
-            apas.append(get_ap_amplitude(ap_data[x]))
+            try:
+                apas.append(get_ap_amplitude(ap_data[x]))
+            except:
+                apas.append('NaN')
 
     if does_plot:
         plt.plot(apas)
@@ -505,11 +517,17 @@ def get_all_vmax(ap_data, does_plot = False):
     if type(ap_data) == pd.core.frame.DataFrame:
         cycle_lengths = get_cycle_lengths(ap_data)
         for x in range(1,len(cycle_lengths)+1):
-            single_ap = get_single_ap(ap_data, x)
-            vmax.append(get_slope(single_ap))
+            try:
+                single_ap = get_single_ap(ap_data, x)
+                vmax.append(get_slope(single_ap))
+            except:
+                vmax.append('NaN')
     elif type(ap_data) == list:
         for x in range(len(ap_data)):
-            vmax.append(get_slope(ap_data[x]))
+            try:
+                vmax.append(get_slope(ap_data[x]))
+            except:
+                vmax.append('NaN')
 
     if does_plot:
         plt.plot(vmax)
@@ -524,11 +542,17 @@ def get_all_sfs(ap_data, does_plot = False):
     if type(ap_data) == pd.core.frame.DataFrame:
         cycle_lengths = get_cycle_lengths(ap_data)
         for x in range(1,len(cycle_lengths)+1):
-            single_ap = get_single_ap(ap_data, x)
-            sfs.append(get_ap_shape_factor(single_ap))
+            try:
+                single_ap = get_single_ap(ap_data, x)
+                sfs.append(get_ap_shape_factor(single_ap))
+            except:
+                sfs.append('NaN')
     elif type(ap_data) == list:
         for x in range(len(ap_data)):
-            sfs.append(get_ap_shape_factor(ap_data[x]))
+            try:
+                sfs.append(get_ap_shape_factor(ap_data[x]))
+            except:
+                sfs.append('NaN')
 
     if does_plot:
         plt.plot(sfs)
@@ -547,7 +571,7 @@ def is_spontaneous(ap_data, peak):
     start = peak - int(cycle_length / 5) - int(time_start_loc)
     end = peak - int(cycle_length / 10) - int(time_start_loc)
     before_upslope = slope[start:end]
-    if np.average(before_upslope) > .0000018 and spontaneous == False:
+    if np.average(before_upslope) > .000001 and spontaneous == False:
         spontaneous = True
 
     return spontaneous
@@ -619,7 +643,10 @@ def get_ap_features(ap_data, filename):
         single_ap = all_saps[x]
         start_times.append(single_ap['Time (s)'].idxmin())
         end_times.append(single_ap['Time (s)'].idxmax())
-        mdps.append(get_mdp(single_ap))
+        try:
+            mdps.append(get_mdp(single_ap))
+        except:
+            mdps.append('NaN')
         spontaneous = is_spontaneous(single_ap, peaks[x])
         if spontaneous:
             classes.append('spontaneous')
