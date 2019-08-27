@@ -27,4 +27,4 @@ $ git clone https://github.com/Christini-Lab/RTXI-data-analysis-toolkit.git
 $ jupyter notebook
 ```
 
-5. The `jupyter notebook` command should open a new window in your web browser. Follow the instruction there.
+5. The `jupyter notebook` command should open a new window in your web browser. Open the `rtxi_processing interface` file and follow the instructions there.
