@@ -836,6 +836,32 @@ def get_apdn_apdn1_with_apds(apd_data, display_percent, does_plot=False):
     return apdn_apdn1
 
 
+def graph_sap_features(data_table, ap_data, ap_number, feature):
+    all_saps = get_saps_from_data_table(ap_data, data_table)
+    sap = all_saps[ap_number - 1]
+    if feature == 'action potential':
+        plot_single_ap(sap)
+    elif 'duration' in feature:
+        temp = re.findall(r'\d+', feature)
+        res = list(map(int, temp))[0]
+        get_ap_duration(sap, .5, res/100, True)
+    elif feature == 'amplitude':
+        get_ap_amplitude(sap, True)
+    elif feature == 'mdp':
+        get_mdp(sap, True)
+    elif feature == 'shape factor':
+        get_ap_shape_factor(sap, True)
+    elif feature == 'dv/dt max':
+        get_slope(sap, True)
+
+
+def graph_sap_features_interact(data_table, ap_data):
+    end = len(data_table)
+    list_of_choices = ['action potential', 'duration 30', 'duration 40', 'duration 70', 'duration 80', 'duration 90', 'amplitude', 'mdp', 'shape factor', 'dv/dt max']
+    interact(graph_sap_features, data_table = fixed(data_table), ap_data = fixed(ap_data), ap_number=(1, end), feature = list_of_choices)
+
+
+
 filename = 'data/attempt_2_071519.h5'
 # plot_all_aps(filename)
 # trial_number=6
