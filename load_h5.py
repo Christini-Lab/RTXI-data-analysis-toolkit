@@ -246,8 +246,10 @@ def get_single_ap(ap_data, ap_number, does_plot=False):
 def get_ap_sf_points(ap_data, repolarization_percent):
     voltage = ap_data['Voltage (V)']
     time = ap_data['Time (s)']
-    ap_data_post_max = ap_data[(voltage.idxmax() - time.idxmin()):(voltage.idxmin() - time.idxmin())]
-    voltage_90 = voltage.min() + (get_ap_amplitude(ap_data) * (1 - repolarization_percent))
+    ap_data_post_max_all = ap_data[(voltage.idxmax() - time.idxmin()):]
+    new_voltage = ap_data_post_max_all['Voltage (V)']
+    ap_data_post_max = ap_data_post_max_all[:(new_voltage.idxmin() - time.idxmin())]
+    voltage_90 = new_voltage.min() + (get_ap_amplitude(ap_data) * (1 - repolarization_percent))
     time_end = time.loc[(ap_data_post_max['Voltage (V)'] - voltage_90).abs().idxmin()]
 
     return time_end, voltage_90
