@@ -702,7 +702,7 @@ def get_apdn_apdn1(ap_data, depolarization_percent, repolarization_percent, does
         plt.plot(apdn_apdn1)
         plt.xlabel('Action Potentials')
         display_percent = repolarization_percent*100
-        plt.ylabel(f'APD {display_percent}%n - APD {display_percent}%n+1 (V)')
+        plt.ylabel(f'APD {display_percent}n - APD {display_percent}n+1 (V)')
 
     return apdn_apdn1
 
@@ -839,6 +839,8 @@ def graph_column(data_table, feature):
         plot_restitution_curve(data_table)
     elif feature == 'apdn - apdn+1':
         get_apdn_apdn1_with_apds(data_table['Duration 90% (s)'], 90, True)
+    elif feature == 'apdn vs apdn+1':
+        plot_apdn_v_apdn1(data_table['Duration 90% (s)'], 90)
     else:
         column_index = tag
         plt.ylabel(tag)
@@ -847,7 +849,7 @@ def graph_column(data_table, feature):
 
 
 def graph_column_interact(data_table):
-    list_of_choices = ['cycle lengths','diastolic intervals', 'restitution curve', 'duration 30', 'duration 40', 'duration 70', 'duration 80', 'duration 90', 'apdn - apdn+1', 'amplitude', 'mdp', 'shape factor', 'dv/dt max']
+    list_of_choices = ['cycle lengths','diastolic intervals', 'restitution curve', 'duration 30', 'duration 40', 'duration 70', 'duration 80', 'duration 90', 'apdn - apdn+1', 'apdn vs apdn+1', 'amplitude', 'mdp', 'shape factor', 'dv/dt max']
     interact(graph_column, data_table = fixed(data_table), feature = list_of_choices)
 
 
@@ -867,7 +869,7 @@ def get_apdn_apdn1_with_apds(apd_data, display_percent, does_plot=False):
     if does_plot:
         plt.plot(apdn_apdn1)
         plt.xlabel('Action Potentials')
-        plt.ylabel(f'APD {display_percent}%n - APD {display_percent}%n+1 (V)')
+        plt.ylabel(f'APD {display_percent}n - APD {display_percent}n+1 (V)')
 
     return apdn_apdn1
 
@@ -895,6 +897,16 @@ def graph_sap_features_interact(data_table, ap_data):
     end = len(data_table)
     list_of_choices = ['action potential', 'duration 30', 'duration 40', 'duration 70', 'duration 80', 'duration 90', 'amplitude', 'mdp', 'shape factor', 'dv/dt max']
     interact(graph_sap_features, data_table = fixed(data_table), ap_data = fixed(ap_data), ap_number=(1, end), feature = list_of_choices)
+
+
+def plot_apdn_v_apdn1(apd_data, display_percent):
+    apdn = apd_data.copy()
+    apdn1 = apd_data.copy()
+    apdn.pop(len(apdn)-1)
+    apdn1.pop(0)
+    plt.scatter(apdn,apdn1)
+    plt.xlabel(f'APD {display_percent}n (V)')
+    plt.ylabel(f'APD {display_percent}n+1 (V)')
 
 
 
