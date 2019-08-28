@@ -327,11 +327,10 @@ def get_various_aps(ap_data, does_plot=False):
 
     if does_plot:
         patches = []
-        colors = ['C0', 'C1', 'C2', 'C3', 'C4']
         for x in range(number_of_aps):
             aps_copy = zero_ap_data(aps[x].reset_index())
             plot_single_ap(aps_copy)
-            patches.append(mpatches.Patch(color = colors[x], label = locs[x]))
+            patches.append(mpatches.Patch(color = f'C{x}', label = locs[x]))
         plt.legend(handles = patches, title = 'AP Indices')
 
     return aps
@@ -425,10 +424,20 @@ def get_all_apas(ap_data, does_plot = False):
 
 def get_ap_range(ap_data, first_ap, last_ap, split, does_plot=False):
     last_ap_copy = last_ap + 1
-    ap_range = get_single_ap(ap_data, first_ap)
-    ap_range_singles = [get_single_ap(ap_data, first_ap)]
+    first_sap = get_single_ap(ap_data, first_ap)
+    ap_range = first_sap
+    ap_range_singles = [first_sap]
+    voltage_local_max = find_voltage_peaks(ap_data['Voltage (V)'])
     for x in range(1, last_ap_copy - first_ap):
-        this_sap = get_single_ap(ap_data, (first_ap + x))
+        cycle_start = voltage_local_max[(first_ap + x) - 1]
+        single_ap_max = ap_data[cycle_start:voltage_local_max[(first_ap + x)]]
+        if len(single_ap_max['Time (s)']) > 25000:
+            ap_start = cycle_start - 5000
+            ap_end = cycle_start + 5000
+        else:
+            ap_start = cycle_start - int(len(single_ap_max['Time (s)']) / 4)
+            ap_end = ap_start + len(single_ap_max['Time (s)'])
+        this_sap = ap_data[ap_start:ap_end]
         ap_range = pd.concat([ap_range, this_sap])
         ap_range_singles.append(this_sap)
 
@@ -436,10 +445,8 @@ def get_ap_range(ap_data, first_ap, last_ap, split, does_plot=False):
         for x in range(len(ap_range_singles)):
             plot_single_ap(ap_range_singles[x])
         patches = []
-        colors = ['C0', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9']
         for x in range(len(ap_range_singles)):
-            current_color = x % 10
-            patches.append(mpatches.Patch(color=colors[current_color], label=first_ap + x))
+            patches.append(mpatches.Patch(color=f'C{x}', label=first_ap + x))
         plt.legend(handles = patches, loc = 'center left', bbox_to_anchor = (1.1, .5), ncol = 2, title = 'AP Indices')
 
     if split:
