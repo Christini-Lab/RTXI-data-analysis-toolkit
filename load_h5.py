@@ -11,6 +11,7 @@ import random
 from ipywidgets import interact, interactive, fixed, interact_manual
 import ipywidgets as widgets
 import re
+import math
 
 
 # 2. Read in the file
@@ -905,8 +906,28 @@ def plot_apdn_v_apdn1(apd_data, display_percent):
     apdn.pop(len(apdn)-1)
     apdn1.pop(0)
     plt.scatter(apdn,apdn1)
+    pfit = np.polyfit(apdn, apdn1, 1)
+    trend_line_model = np.poly1d(pfit)
+    plt.plot(apdn, trend_line_model(apdn), "r-")
     plt.xlabel(f'APD {display_percent}n (V)')
     plt.ylabel(f'APD {display_percent}n+1 (V)')
+
+
+def plot_restitution_curve_post_ap(data_table):
+    di_list = list(data_table['Diastolic Intervals pre-AP (s)'])
+    apd_list = list(data_table[f'Duration 90% (s)'])
+    pop_it = []
+    for x in range(len(di_list)):
+        if math.isnan(di_list[x]):
+            pop_it.append(x)
+    for x in range(len(pop_it) - 1, -1, -1):
+        di_list.pop(pop_it[x])
+        apd_list.pop(pop_it[x])
+    di_list.pop(0)
+    apd_list.pop(-1)
+    plt.scatter(di_list,apd_list)
+    plt.ylabel('Duration 90% (s)')
+    plt.xlabel('Diastolic Intervals post-AP (s)')
 
 
 
