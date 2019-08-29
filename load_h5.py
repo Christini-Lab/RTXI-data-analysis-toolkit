@@ -836,7 +836,9 @@ def graph_column(data_table, feature):
         tag = 'Shape Factor'
     elif feature == 'dv/dt max':
         tag = 'dv/dt Max (V/s)'
-    if feature == 'restitution curve':
+    if feature == 'restitution curve (proceding di)':
+        plot_restitution_curve_post_ap(data_table)
+    elif feature == 'restitution curve (preceding di)':
         plot_restitution_curve(data_table)
     elif feature == 'apdn - apdn+1':
         get_apdn_apdn1_with_apds(data_table['Duration 90% (s)'], 90, True)
@@ -850,7 +852,7 @@ def graph_column(data_table, feature):
 
 
 def graph_column_interact(data_table):
-    list_of_choices = ['cycle lengths','diastolic intervals', 'restitution curve', 'duration 30', 'duration 40', 'duration 70', 'duration 80', 'duration 90', 'apdn - apdn+1', 'apdn vs apdn+1', 'amplitude', 'mdp', 'shape factor', 'dv/dt max']
+    list_of_choices = ['cycle lengths','diastolic intervals', 'restitution curve (preceding di)', 'restitution curve (proceding di)', 'duration 30', 'duration 40', 'duration 70', 'duration 80', 'duration 90', 'apdn - apdn+1', 'apdn vs apdn+1', 'amplitude', 'mdp', 'shape factor', 'dv/dt max']
     interact(graph_column, data_table = fixed(data_table), feature = list_of_choices)
 
 
