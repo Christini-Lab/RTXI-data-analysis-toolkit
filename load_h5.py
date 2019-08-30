@@ -225,7 +225,7 @@ def get_ap_duration(sap_data, depolarization_percent, repolarization_percent, do
 
 
 def get_single_ap(ap_data, ap_number, does_plot=False):
-    voltage_local_max = find_voltage_peaks(ap_data['Voltage (V)'])
+    voltage_local_max = find_voltage_peaks(ap_data)
     if ap_number == 0:
         ap_number = random.randint(1,(len(voltage_local_max)-1))
     cycle_start = voltage_local_max[ap_number - 1]
@@ -235,6 +235,8 @@ def get_single_ap(ap_data, ap_number, does_plot=False):
         ap_end = cycle_start + 5000
     else:
         ap_start = cycle_start - int(len(single_ap_max['Time (s)']) / 4)
+        if ap_start < 0:
+            ap_start = 0
         ap_end = ap_start + len(single_ap_max['Time (s)'])
     single_ap = ap_data[ap_start:ap_end]
 
@@ -278,7 +280,7 @@ def get_ap_shape_factor(ap_data, does_plot=False):
 
 
 def get_cycle_lengths(ap_data, does_plot = False):
-    voltage_local_max = find_voltage_peaks(ap_data['Voltage (V)'])
+    voltage_local_max = find_voltage_peaks(ap_data)
     cycle_lengths = []
     for x in range(len(voltage_local_max) - 1):
         cycle_time = ap_data[voltage_local_max[x]:voltage_local_max[x + 1]]['Time (s)']
@@ -304,8 +306,14 @@ def plot_single_ap(sap_data):
     plt.ylabel('Voltage (V)')
 
 
-def find_voltage_peaks(voltage):
-    voltage_peaks = np.ndarray.tolist(list(signal.find_peaks(voltage, distance=4500, prominence=.03, height=0))[0])
+def find_voltage_peaks(ap_data):
+    time = ap_data['Time (s)']
+    voltage = ap_data['Voltage (V)']
+    time_min = time.min()
+    time_index_min = time.idxmin()
+    time_end = (time - (time_min+.45)).abs().idxmin()
+    threshold = time_end - time_index_min
+    voltage_peaks = np.ndarray.tolist(list(signal.find_peaks(voltage, distance=threshold, prominence=.03, height=0))[0])
 
     return voltage_peaks
 
@@ -428,7 +436,7 @@ def get_ap_range(ap_data, first_ap, last_ap, split, does_plot=False):
     first_sap = get_single_ap(ap_data, first_ap)
     ap_range = first_sap
     ap_range_singles = [first_sap]
-    voltage_local_max = find_voltage_peaks(ap_data['Voltage (V)'])
+    voltage_local_max = find_voltage_peaks(ap_data)
     for x in range(1, last_ap_copy - first_ap):
         cycle_start = voltage_local_max[(first_ap + x) - 1]
         single_ap_max = ap_data[cycle_start:voltage_local_max[(first_ap + x)]]
@@ -627,7 +635,7 @@ def get_mdp(single_ap, does_plot=False):
 
 
 def get_ap_features(ap_data, filename):
-    peaks = find_voltage_peaks(ap_data['Voltage (V)'])
+    peaks = find_voltage_peaks(ap_data)
     dis = get_diastolic_intervals(ap_data)
     all_saps = get_all_saps(ap_data)
     cycle_lengths = get_cycle_lengths(ap_data)
@@ -709,7 +717,7 @@ def get_apdn_apdn1(ap_data, depolarization_percent, repolarization_percent, does
 
 
 def get_diastolic_intervals(ap_data, does_plot=False):
-    peaks = find_voltage_peaks(ap_data['Voltage (V)'])
+    peaks = find_voltage_peaks(ap_data)
     diastolic_intervals = []
     plotted_intervals = []
     for x in range(len(peaks) - 1):
