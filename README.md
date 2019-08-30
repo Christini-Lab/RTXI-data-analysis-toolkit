@@ -24,16 +24,17 @@ A collection of tools for processing RTXI output data
 
 #### Where to start:
 
-1. Install [Jupyter Notebook](https://jupyter.org/install) on your computer
-2. From the terminal, clone this repo onto your computer:
+1. If you don't already have anaconda installed, download it here: [Anaconda](https://www.anaconda.com/distribution/#download-section)
+2. Install [Jupyter Notebook](https://jupyter.org/install) on your computer
+3. From the terminal, clone this repo onto your computer:
 ```
 $ git clone https://github.com/Christini-Lab/RTXI-data-analysis-toolkit.git
 ```
-3. If you don't have an h5 file that you want to process, you can get an example file from the [Christini Box account](https://cornell.app.box.com/folder/78710760726). Copy the h5 file into the `./data/` folder in this directory.
+4. If you don't have an h5 file that you want to process, you can get an example file from the [Christini Box account](https://cornell.app.box.com/folder/78710760726). Copy the h5 file into the `./data/` folder in this directory.
 
-4. From the terminal, start a jupyter notebook session:
+5. From the terminal, start a jupyter notebook session:
 ```
 $ jupyter notebook
 ```
 
-5. The `jupyter notebook` command should open a new window in your web browser. Open the `rtxi_processing interface` file and follow the instructions there.
+6. The `jupyter notebook` command should open a new window in your web browser. Open the `rtxi_processing interface` file and follow the instructions there.
