@@ -6,12 +6,21 @@ A collection of tools for processing RTXI output data
 - **process_rtxi.ipynb** includes step-by-step instructions for processing and visualizing the data
 
 #### Current Features:
-- Load h5 file
-- Plot Voltage and Current vs time for the given trial
-- Print tags for the given trial
-- Allow the user to zoom in / out on the voltage plot
-- Extract single action potential data and save it to local **./data** folder
-- Plot extracted APs from experiment on top of one another
+- Load h5 file into python
+- Plot Voltage and Current vs time and print tags for the given trial
+- Automatically finds action potentials in the data
+- Finds the following features for every action potential:
+    - Start Time
+    - End Time
+    - Spontaneous vs. Non-spontaneous
+    - Cycle Length
+    - Diastolic Intervals
+    - Duration at 30, 40, 70, 80, and 90% repolarization
+    - Amplitude
+    - Maximum Diastolic Potential
+    - Shape Factor
+    - Maximum Upstroke Velocity
+- Plot this information across all action potentials
 
 #### Where to start:
 
