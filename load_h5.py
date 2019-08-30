@@ -815,13 +815,15 @@ def faster_smoothing(ap_data, window, does_plot=False):
     return smoothed_data
 
 
-def load_recorded_data(filename, trial_number, does_plot=False):
+def load_recorded_data(filename, trial_number, does_plot=False, no_tags=True):
     f = load_h5(f'data/{filename}')
     recorded_data = get_exp_as_df(f, trial_number)
-    tags = get_tags(f, trial_number)
+    if (no_tags==False):
+        tags = get_tags(f, trial_number)
 
     if does_plot:
-        print(tags)
+        if (no_tags==False):
+            print(tags)
         plot_V_and_I(recorded_data)
 
     return recorded_data
