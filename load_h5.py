@@ -32,14 +32,20 @@ def extract_channel_data(data_h5, trial_number):
 
 
 def plot_V_and_I(data):
-    fig, axes = plt.subplots(2, 1)
-    fig.tight_layout()
+    fig, axes = plt.subplots(2, 1, figsize=(10,8))
+    data['Current'][data['Current'].abs() > .25E-9] = 0
+    data['Voltage (V)'] = data['Voltage (V)'] * 1000
 
-    axes[0].title.set_text('Voltage (V)')
+    axes[0].set_ylabel('Voltage (mV)', fontsize=20)
     axes[0].plot(data['Time (s)'], data['Voltage (V)'])
+    axes[0].tick_params(labelsize=14)
 
-    axes[1].title.set_text('Current (A)')
+    axes[1].set_ylabel('Current (A)', fontsize=20)
+    axes[1].set_xlabel('Time (s)', fontsize=20)
     axes[1].plot(data['Time (s)'], data['Current'])
+    axes[1].tick_params(labelsize=14)
+    #axes[1].set_ylim([-.5, .5])
+    plt.savefig('rtxi_V_I.svg')
     plt.show()
 
 
@@ -850,6 +856,8 @@ def graph_column(data_table, feature):
         plot_restitution_curve_post_ap(data_table)
     elif feature == 'restitution curve (preceding di)':
         plot_restitution_curve(data_table)
+    elif feature == 'restitution curve (CL)':
+        plot_restitution_curve_cl(data_table)
     elif feature == 'apdn - apdn+1':
         get_apdn_apdn1_with_apds(data_table['Duration 90% (s)'], 90, True)
     elif feature == 'apdn vs apdn+1':
@@ -862,7 +870,7 @@ def graph_column(data_table, feature):
 
 
 def graph_column_interact(data_table):
-    list_of_choices = ['cycle lengths','diastolic intervals', 'restitution curve (preceding di)', 'restitution curve (proceding di)', 'duration 30', 'duration 40', 'duration 70', 'duration 80', 'duration 90', 'apdn - apdn+1', 'apdn vs apdn+1', 'amplitude', 'mdp', 'shape factor', 'dv/dt max']
+    list_of_choices = ['cycle lengths','diastolic intervals', 'restitution curve (preceding di)', 'restitution curve (proceding di)', 'restitution curve (CL)' ,'duration 30', 'duration 40', 'duration 70', 'duration 80', 'duration 90', 'apdn - apdn+1', 'apdn vs apdn+1', 'amplitude', 'mdp', 'shape factor', 'dv/dt max']
     interact(graph_column, data_table = fixed(data_table), feature = list_of_choices)
 
 
@@ -942,28 +950,28 @@ def plot_restitution_curve_post_ap(data_table):
     plt.xlabel('Diastolic Intervals post-AP (s)')
 
 
+def plot_restitution_curve_cl(data_table):
+    cl_list = list(data_table['Cycle Lengths (s)'])
+    apd_list = list(data_table[f'Duration 90% (s)'])
+    pop_it = []
+    for x in range(len(cl_list)):
+        if math.isnan(cl_list[x]):
+            pop_it.append(x)
+    for x in range(len(pop_it) - 1, -1, -1):
+        cl_list.pop(pop_it[x])
+        apd_list.pop(pop_it[x])
+    cl_list.pop(0)
+    apd_list.pop(-1)
+    plt.scatter(cl_list,apd_list)
+    plt.ylabel('Duration 90% (s)')
+    plt.xlabel('Cycle Length (s)')
 
-filename = 'data/attempt_2_071519.h5'
-# plot_all_aps(filename)
-# trial_number=6
-#
-# data_h5=load_h5(filename)
-#
-# exp_data=get_exp_as_df(data_h5,trial_number)
-# plot_V_and_I(exp_data)
-# t_data=get_time_data(data_h5,trial_number)
-# exp_data_sub=subsample_data(exp_data,78,85)
-# tags=get_tags(data_h5,trial_number)
-# label='stim'
-# save_SAP_to_csv(filename,exp_data_sub,label)
-#
-# plt.plot(exp_data_sub['Time (s)'], exp_data_sub['Voltage (V)'])
-# plt.show()
-#
-#
-#
-# file_path=f'{data_path}/sap_{max_number+1}_qq_{label}.csv'
+#filename = 'attempt_2_071519.h5'
+#trial_number = 2
+#does_plot = True
+#no_tag = True
+#recorded_data = load_recorded_data(filename, trial_number, does_plot, no_tag)
+#filename = '1hz_test'
+#ap_features = load_ap_features(filename)
+#graph_column_interact(ap_features)
 
-# ch_data=extract_channel_data(data_h5,trial_number)
-# voltage_channel=2
-# current_channel=1
