@@ -695,7 +695,6 @@ def load_ap_features(filename):
 
     return ap_features
 
-
 def get_saps_from_data_table(ap_data, data_table):
     start_times = data_table['Start']
     end_times = data_table['End']
