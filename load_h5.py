@@ -869,7 +869,7 @@ def graph_column(data_table, feature):
 
 
 def graph_column_interact(data_table):
-    list_of_choices = ['cycle lengths','diastolic intervals', 'restitution curve (preceding di)', 'restitution curve (proceding di)', 'restitution curve (CL)' ,'duration 30', 'duration 40', 'duration 70', 'duration 80', 'duration 90', 'apdn - apdn+1', 'apdn vs apdn+1', 'amplitude', 'mdp', 'shape factor', 'dv/dt max']
+    list_of_choices = ['cycle lengths','diastolic intervals', 'restitution curve (preceding di)', 'restitution curve (proceding di)', 'resitution curve (CL)', 'duration 30', 'duration 40', 'duration 70', 'duration 80', 'duration 90', 'apdn - apdn+1', 'apdn vs apdn+1', 'amplitude', 'mdp', 'shape factor', 'dv/dt max']
     interact(graph_column, data_table = fixed(data_table), feature = list_of_choices)
 
 
@@ -948,7 +948,6 @@ def plot_restitution_curve_post_ap(data_table):
     plt.ylabel('Duration 90% (s)')
     plt.xlabel('Diastolic Intervals post-AP (s)')
 
-
 def plot_restitution_curve_cl(data_table):
     cl_list = list(data_table['Cycle Lengths (s)'])
     apd_list = list(data_table[f'Duration 90% (s)'])
@@ -970,7 +969,5 @@ def plot_restitution_curve_cl(data_table):
 #does_plot = True
 #no_tag = True
 #recorded_data = load_recorded_data(filename, trial_number, does_plot, no_tag)
-#filename = '1hz_test'
-#ap_features = load_ap_features(filename)
-#graph_column_interact(ap_features)
+
 
